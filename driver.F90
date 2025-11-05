@@ -11,7 +11,7 @@
 module DRIVER
 
   !-----------------------------------------------------------------------------
-  ! Code that specializes generic ESM Component code.
+  ! Code that specializes generic ESM Driver Component code.
   !-----------------------------------------------------------------------------
 
   use MPI
@@ -20,7 +20,7 @@ module DRIVER
   use NUOPC_Driver, &
     driverSS             => SetServices
 
-  use ATM, only: atmSS => SetServices
+  use WRF, only: wrfSS => SetServices
   use OCN, only: ocnSS => SetServices
 
   use NUOPC_Connector, only: cplSS => SetServices
@@ -87,7 +87,7 @@ module DRIVER
     type(NUOPC_FreeFormat)        :: ff
     character(len=800)            :: VMLog_char
     logical                       :: VMLog_logical
-    character(len=800)            :: ATM_verbosity
+    character(len=800)            :: WRF_verbosity
     character(len=800)            :: OCN_verbosity
 
     ! - diagnostics -
@@ -136,12 +136,12 @@ module DRIVER
     end if
 
     ! Get model verbosities from config
-    ff = NUOPC_FreeFormatCreate(config, label="ATM_verbosity:", rc=rc)
+    ff = NUOPC_FreeFormatCreate(config, label="WRF_verbosity:", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_FreeFormatGetLine(ff, 1, lineString=ATM_verbosity)
+    call NUOPC_FreeFormatGetLine(ff, 1, lineString=WRF_verbosity)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -157,9 +157,9 @@ module DRIVER
       file=__FILE__)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    ! ATM
+    ! WRF
     ! - set up petList
-    ff = NUOPC_FreeFormatCreate(config, label="ATM_petlist:", rc=rc)
+    ff = NUOPC_FreeFormatCreate(config, label="WRF_petlist:", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -177,27 +177,27 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    ! - add the ATM component to Driver
-    call NUOPC_DriverAddComp(driver, "ATM", atmSS, info=info, &
+    ! - add the WRF component to Driver
+    call NUOPC_DriverAddComp(driver, "WRF", wrfSS, info=info, &
       petList=petList, config=config, comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_CompAttributeSet(child, name="Verbosity", value=trim(ATM_verbosity), rc=rc)
+    call NUOPC_CompAttributeSet(child, name="Verbosity", value=trim(WRF_verbosity), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
     deallocate(petList)
 
-    ! - ATM diagnostics -
+    ! - WRF diagnostics -
     isFlag = ESMF_GridCompIsPetLocal(child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    write(msgString,*) "ATM GridCompIsPetLocal: ", isFlag
+    write(msgString,*) "WRF GridCompIsPetLocal: ", isFlag
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -213,7 +213,7 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    write(msgString,*) "ATM VmIsCreated: ", isFlag
+    write(msgString,*) "WRF VmIsCreated: ", isFlag
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -225,9 +225,9 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
     if (mpiComm==MPI_COMM_NULL) then
-      write(msgString,*) "ATM MPI_COMM_NULL"
+      write(msgString,*) "WRF MPI_COMM_NULL"
     else
-      write(msgString,*) "ATM valid MPI_COMM"
+      write(msgString,*) "WRF valid MPI_COMM"
     endif
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -239,7 +239,7 @@ module DRIVER
 #define ATTR_TEST_2_off
 
 #ifdef ATTR_TEST_1_on
-    ! For testing, set an Attribute on ATM component
+    ! For testing, set an Attribute on WRF component
     call NUOPC_CompAttributeAdd(child, attrList=(/"mapping_garbage_test"/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -334,16 +334,16 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
-    ! SetServices for atm2ocn
-    call NUOPC_DriverAddComp(driver, srcCompLabel="ATM", dstCompLabel="OCN", &
+    ! SetServices for WRF to OCN
+    call NUOPC_DriverAddComp(driver, srcCompLabel="WRF", dstCompLabel="OCN", &
       compSetServicesRoutine=cplSS, comp=connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! SetServices for ocn2atm
-    call NUOPC_DriverAddComp(driver, srcCompLabel="OCN", dstCompLabel="ATM", &
+    ! SetServices for OCN to WRF
+    call NUOPC_DriverAddComp(driver, srcCompLabel="OCN", dstCompLabel="WRF", &
       compSetServicesRoutine=cplSS, comp=connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -485,15 +485,15 @@ module DRIVER
 
     ! section demonstrating access to petLists via NUOPC_DriverGetComp()
 
-    ! directly access ATM component by label
+    ! directly access WRF component by label
     nullify(petList)
-    call NUOPC_DriverGetComp(driver, compLabel="ATM", petList=petList, rc=rc)
+    call NUOPC_DriverGetComp(driver, compLabel="WRF", petList=petList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    write (msg,*) "ATM petList= ", petList
+    write (msg,*) "WRF petList= ", petList
     call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -516,7 +516,7 @@ module DRIVER
       return  ! bail out
 
     ! access petLists for all components under the driver that derive from
-    ! ESMF_GridComp. Here this means ATM and OCN.
+    ! ESMF_GridComp. Here this means WRF and OCN.
     nullify(petLists)
     call NUOPC_DriverGetComp(driver, petLists=petLists, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

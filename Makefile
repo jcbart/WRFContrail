@@ -49,12 +49,12 @@ EXE=CoupledModel
 
 
 # -----------------------------------------------------------------------------
-$(EXE): CoupledModel.o driver.o atm.o ocn.o
+$(EXE): CoupledModel.o driver.o WRF.o ocn.o
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $^ $(ESMF_F90ESMFLINKLIBS)
 
 # module dependencies:
 CoupledModel.o: driver.o
-driver.o: atm.o ocn.o
+driver.o: WRF.o ocn.o
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
@@ -71,9 +71,3 @@ info:
 	@echo ==================================================================
 	@cat $(ESMFMKFILE)
 	@echo ==================================================================
-
-edit:
-	nedit esmApp.F90 esm.F90 atm.F90 ocn.F90 &
-
-run:
-	$(ESMF_INTERNAL_MPIRUN) -np 4 ./esmApp

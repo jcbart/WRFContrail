@@ -8,10 +8,10 @@
 ! Licensed under the University of Illinois-NCSA License.
 !==============================================================================
 
-module ATM
+module WRF
 
   !-----------------------------------------------------------------------------
-  ! ATM Component.
+  ! WRF model component
   !-----------------------------------------------------------------------------
 
   use ESMF
@@ -312,7 +312,7 @@ module ATM
       return  ! bail out
 
 #ifdef print_ssi_info
-    call ESMF_VMLog(vm, prefix="ATM Advance(): ", logMsgFlag=ESMF_LOGMSG_INFO, &
+    call ESMF_VMLog(vm, prefix="WRF Advance(): ", logMsgFlag=ESMF_LOGMSG_INFO, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -325,7 +325,7 @@ module ATM
 !$omp critical
 !$    call ESMF_VMGet(vm, currentSsiPe=currentSsiPe)
 !$    write(msgString,'(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)') &
-!$      "ATM: localPet=", localPet, &
+!$      "WRF: localPet=", localPet, &
 !$      "   thread_num=", omp_get_thread_num(), &
 !$      "   currentSsiPe=", currentSsiPe, &
 !$      "   num_threads=", omp_get_num_threads(), &
@@ -344,7 +344,7 @@ module ATM
     ! for this call of the Advance() routine.
 
     call ESMF_ClockPrint(clock, options="currTime", &
-      preString="------>Advancing ATM from: ", unit=msgString, rc=rc)
+      preString="------>Advancing WRF from: ", unit=msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -371,4 +371,4 @@ module ATM
 
   !-----------------------------------------------------------------------------
 
-end module ATM
+end module WRF
