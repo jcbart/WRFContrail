@@ -39,6 +39,10 @@ module DRIVER
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
 
+    type(ESMF_Config)             :: config
+    type(NUOPC_FreeFormat)        :: ff
+    character(len=:), allocatable :: driver_verbosity
+
     rc = ESMF_SUCCESS
 
     ! derive from NUOPC_Driver
@@ -55,9 +59,28 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    
+    ! get the config
+    call ESMF_GridCompGet(driver, config=config, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get verbosity from config
+    ff = NUOPC_FreeFormatCreate(config, label="driver_verbosity:", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_FreeFormatGetLine(ff, 1, lineString=driver_verbosity)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! set driver verbosity
-    call NUOPC_CompAttributeSet(driver, name="Verbosity", value="low", rc=rc)
+    call NUOPC_CompAttributeSet(driver, name="Verbosity", value=trim(driver_verbosity), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -89,6 +112,8 @@ module DRIVER
     logical                       :: VMLog_logical
     character(len=800)            :: WRF_verbosity
     character(len=800)            :: OCN_verbosity
+    character(len=800)            :: cplFreq_s_char
+    integer                       :: cplFreq_s
 
     ! - diagnostics -
     type(ESMF_VM)                 :: vm
@@ -171,15 +196,16 @@ module DRIVER
       return  ! bail out
 
     ! - set /NUOPC/Hint/PePerPet/MaxCount
-    call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", value=2, &
+    call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", value=1, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    
     ! - add the WRF component to Driver
     call NUOPC_DriverAddComp(driver, "WRF", wrfSS, info=info, &
-      petList=petList, config=config, comp=child, rc=rc)
+      petList=petList, comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -234,27 +260,6 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-
-#define ATTR_TEST_1_off
-#define ATTR_TEST_2_off
-
-#ifdef ATTR_TEST_1_on
-    ! For testing, set an Attribute on WRF component
-    call NUOPC_CompAttributeAdd(child, attrList=(/"mapping_garbage_test"/), &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-#ifdef ATTR_TEST_2_on
-    call NUOPC_CompAttributeSet(child, name="mapping_garbage_test", &
-      value="bla", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-#endif
-#endif
 
     ! OCN
     ! - set up petList
@@ -357,13 +362,34 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
+    ! Get coupling frequency from config
+    ff = NUOPC_FreeFormatCreate(config, label="Coupling frequency (s):", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_FreeFormatGetLine(ff, 1, lineString=cplFreq_s_char)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+    read(cplFreq_s_char, *) cplFreq_s
     ! set the driver clock
-    call ESMF_TimeIntervalSet(timeStep, m=15, rc=rc) ! 15 minute steps
+    call ESMF_TimeIntervalSet(timeStep, s=cplFreq_s, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    msgString = "Coupling frequency: " // trim(cplFreq_s_char) // " s."
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
+    ! SET FROM WRF EXPORT STATE
     call ESMF_TimeSet(startTime, yy=2010, mm=6, dd=1, h=0, m=0, &
       calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

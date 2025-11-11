@@ -18,6 +18,9 @@ module WRF
   use NUOPC
   use NUOPC_Model, &
     modelSS    => SetServices
+  
+  ! WRF modules
+  use module_wrf_component_top
 
   implicit none
 
@@ -41,7 +44,24 @@ module WRF
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-
+    
+    ! set entry points for initialising WRF
+    call NUOPC_CompSetEntryPoint(model, ESMF_METHOD_INITIALIZE,       &
+                                 phaseLabelList=(/"IPDv00p1"/),       &
+                                 userRoutine=wrf_component_init1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    call NUOPC_CompSetEntryPoint(model, ESMF_METHOD_INITIALIZE,       &
+                                 phaseLabelList=(/"IPDv00p2"/),       &
+                                 userRoutine=wrf_component_init2, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
     ! specialize model
     call NUOPC_CompSpecialize(model, specLabel=label_Advertise, &
       specRoutine=Advertise, rc=rc)
@@ -71,7 +91,7 @@ module WRF
     integer, intent(out) :: rc
 
     ! local variables
-    type(ESMF_State)        :: importState, exportState
+    type(ESMF_State)     :: importState, exportState
 
     rc = ESMF_SUCCESS
 
@@ -83,58 +103,9 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! Disabling the following macro, e.g. renaming to WITHIMPORTFIELDS_disable,
-    ! will result in a model component that does not advertise any importable
-    ! Fields. Use this if you want to drive the model independently.
-#define WITHIMPORTFIELDS_GRID
-#ifdef WITHIMPORTFIELDS_GRID
-    ! importable field: sea_surface_temperature
-    call NUOPC_Advertise(importState, &
-      StandardName="sea_surface_temperature", name="sst", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-#endif
-
-#define WITHIMPORTFIELDS_MESH
-#ifdef WITHIMPORTFIELDS_MESH
-    ! importable field: sea_surface_salinity
-    call NUOPC_Advertise(importState, &
-      StandardName="sea_surface_salinity", name="sss", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-#endif
-
     ! exportable field: air_pressure_at_sea_level
-    call NUOPC_Advertise(exportState, &
-      StandardName="air_pressure_at_sea_level", name="pmsl", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! exportable field: surface_net_downward_shortwave_flux
-    call NUOPC_Advertise(exportState, &
-      StandardName="surface_net_downward_shortwave_flux", name="rsns", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! exportable field: precipitation_flux
-    call NUOPC_Advertise(exportState, &
-      StandardName="precipitation_flux", name="precip", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! exportable field: magnitude_of_surface_downward_stress
-    call NUOPC_Advertise(exportState, &
-      StandardName="magnitude_of_surface_downward_stress", name="msds", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="XLAT", name="XLAT", &
+      TransferOfferGeomObject="will provide", rc=rc) ! NUOPC name vs internal WRF name
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -150,16 +121,15 @@ module WRF
 
     ! local variables
     type(ESMF_State)        :: importState, exportState
+    type(ESMF_DistGrid)     :: distgrid2D
+    type(ESMF_DistGrid)     :: distgrid3D
+    type(ESMF_Grid)         :: grid2D
+    type(ESMF_Grid)         :: grid3D
     type(ESMF_Field)        :: field
-    type(ESMF_Grid)         :: gridIn, gridOut
-    type(ESMF_Mesh)         :: meshIn, meshOut
 
-    integer, parameter              :: totalNumPoints=100
-    integer(ESMF_KIND_I4), pointer  :: mask(:)
-    real(ESMF_KIND_R8), pointer     :: lon(:), lat(:)
-    real(ESMF_KIND_R8), pointer     :: fptr(:)
-    integer                         :: clb(1), cub(1), i
-    type(ESMF_VM)                   :: vm
+    ! WRF domain info
+    INTEGER(ESMF_KIND_I4)   :: intvals(19)
+    integer                 :: ids, ide, jds, jde, kds, kde
 
     rc = ESMF_SUCCESS
 
@@ -171,102 +141,41 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! create Grid objects for Fields
-    gridIn = ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/10, 100/), &
-      minCornerCoord=(/10._ESMF_KIND_R8, 20._ESMF_KIND_R8/), &
-      maxCornerCoord=(/100._ESMF_KIND_R8, 200._ESMF_KIND_R8/), &
-      coordSys=ESMF_COORDSYS_CART, &
-      staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    gridOut = gridIn ! for now out same as in
+    ! Get WRF domain info
+    call ESMF_AttributeGet(importState, 'DecompositionIntegers', intvals)
+    ids = intvals(1)
+    ide = intvals(2)
+    jds = intvals(3)
+    jde = intvals(4)
+    kds = intvals(5)
+    kde = intvals(6)
 
-    ! create Mesh objects for Fields
-    meshIn = ESMF_MeshCreate(grid=gridIn, rc=rc)
+    distgrid2D = ESMF_DistGridCreate(minIndex=(/ ids, jds /), maxIndex=(/ ide, jde /), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    meshOut = ESMF_MeshCreate(grid=gridOut, rc=rc)
+    
+    distgrid3D = ESMF_DistGridCreate(minIndex=(/ ids, jds, kds /), maxIndex=(/ ide, jde, kde /), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-
-#ifdef WITHIMPORTFIELDS_GRID
-    ! importable field on Grid: sea_surface_temperature
-    field = ESMF_FieldCreate(name="sst", grid=gridIn, &
-      typekind=ESMF_TYPEKIND_R8, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_Realize(importState, field=field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-#endif
-
-#ifdef WITHIMPORTFIELDS_MESH
-    ! importable field on Mesh: sea_surface_salinity
-    field = ESMF_FieldCreate(name="sss", mesh=meshIn, &
-      typekind=ESMF_TYPEKIND_R8, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_Realize(importState, field=field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-#endif
-
-    ! exportable field on Grid: air_pressure_at_sea_level
-    field = ESMF_FieldCreate(name="pmsl", grid=gridOut, &
-      typekind=ESMF_TYPEKIND_R8, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_Realize(exportState, field=field, rc=rc)
+    
+    grid2D = ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: surface_net_downward_shortwave_flux
-    field = ESMF_FieldCreate(name="rsns", grid=gridOut, &
-      typekind=ESMF_TYPEKIND_R8, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_Realize(exportState, field=field, rc=rc)
+    grid3D = ESMF_GridCreate(distgrid=distgrid3D, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Mesh: precipitation_flux
-    field = ESMF_FieldCreate(name="precip", mesh=meshOut, &
-      typekind=ESMF_TYPEKIND_R8, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_Realize(exportState, field=field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! exportable field on Mesh: magnitude_of_surface_downward_stress
-    field = ESMF_FieldCreate(name="msds", mesh=meshOut, &
+    ! exportable field on Grid: XLAT
+    field = ESMF_FieldCreate(name="XLAT", grid=grid2D, &
       typekind=ESMF_TYPEKIND_R8, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -282,6 +191,7 @@ module WRF
 
   !-----------------------------------------------------------------------------
 
+! NOT IN USE
   subroutine Advance(model, rc)
 !$  use omp_lib
     type(ESMF_GridComp)  :: model
@@ -342,6 +252,16 @@ module WRF
     ! its timeStep is equal to the parent timeStep. As a consequence the
     ! currTime + timeStep is equal to the stopTime of the internal Clock
     ! for this call of the Advance() routine.
+
+    ! Do ESMF_StateGet()
+
+    call wrf_component_run(model, importState, exportState, clock, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Do ESMF_StateAdd()
 
     call ESMF_ClockPrint(clock, options="currTime", &
       preString="------>Advancing WRF from: ", unit=msgString, rc=rc)

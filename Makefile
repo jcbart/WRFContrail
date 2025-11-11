@@ -28,18 +28,24 @@ include $(ESMFMKFILE)
 ESMF_INTERNAL_MPIRUN := $(shell echo $(ESMF_INTERNAL_MPIRUN))
 
 # Define executable name
-EXE=CoupledModel
+TARGET=build/CoupledModel
 
 ################################################################################
 ################################################################################
 
+# Change name as required
+include ./wrflib.mk
+
+WRFIOFLAGS = -fconvert=big-endian -frecord-marker=4
+
+# -----------------------------------------------------------------------------
 .SUFFIXES: .f90 .F90 .c .C
 
 %.o : %.f90
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(WRF_INC) $(WRFIOFLAGS) $(ESMF_F90COMPILEFREENOCPP) $<
 
 %.o : %.F90
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(WRF_INC) $(WRFIOFLAGS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
         
 %.o : %.c
 	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
@@ -49,20 +55,21 @@ EXE=CoupledModel
 
 
 # -----------------------------------------------------------------------------
-$(EXE): CoupledModel.o driver.o WRF.o ocn.o
-	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $^ $(ESMF_F90ESMFLINKLIBS)
+$(TARGET): CoupledModel.o driver.o WRF.o ocn.o wrf_ESMFMod.o
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $^ $(WRF_LIB) $(ESMF_F90ESMFLINKLIBS)
 
 # module dependencies:
 CoupledModel.o: driver.o
 driver.o: WRF.o ocn.o
+WRF.o: wrf_ESMFMod.o
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 .PHONY: dust clean distclean info edit
 dust:
-	rm -f PET*.ESMF_LogFile
+	rm -f build/PET*.ESMF_LogFile
 clean:
-	rm -f $(EXE) *.o *.mod
+	rm -f $(TARGET) *.o *.mod
 distclean: dust clean
 
 info:

@@ -1,4 +1,5 @@
+build/*
+!build/CoupledModel.config
+wrflib.mk
 *.o
 *.mod
-*.ESMF_LogFile
-CoupledModel
