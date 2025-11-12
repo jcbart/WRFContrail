@@ -39,6 +39,7 @@ module DRIVER
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
 
+    ! local variables
     type(ESMF_Config)             :: config
     type(NUOPC_FreeFormat)        :: ff
     character(len=:), allocatable :: driver_verbosity
@@ -55,6 +56,14 @@ module DRIVER
     ! specialize driver
     call NUOPC_CompSpecialize(driver, specLabel=label_SetModelServices, &
       specRoutine=SetModelServices, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! add routine for deriving driver clock from WRF clock
+    call NUOPC_CompSpecialize(driver, specLabel=label_SetRunClock, &
+      specRoutine=SetRunClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -100,7 +109,7 @@ module DRIVER
     type(ESMF_Time)               :: startTime
     type(ESMF_Time)               :: stopTime
     type(ESMF_TimeInterval)       :: timeStep
-    type(ESMF_Clock)              :: internalClock
+    type(ESMF_Clock)              :: driverClock
     type(ESMF_GridComp)           :: child
     type(ESMF_CplComp)            :: connector
     integer                       :: i
@@ -355,7 +364,6 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
     
-    
     call NUOPC_CompAttributeSet(connector, name="Verbosity", value="low", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -389,29 +397,29 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
-    ! SET FROM WRF EXPORT STATE
-    call ESMF_TimeSet(startTime, yy=2010, mm=6, dd=1, h=0, m=0, &
+    ! Bogus values until WRF is initialised
+    call ESMF_TimeSet(startTime, yy=2000, mm=1, dd=1, h=0, m=0, s=0, &
+      calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=1, m=0, s=0, &
       calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_TimeSet(stopTime, yy=2010, mm=6, dd=1, h=1, m=0, &
-      calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    internalClock = ESMF_ClockCreate(name="Application Clock", &
+    driverClock = ESMF_ClockCreate(name="Driver Clock", &
       timeStep=timeStep, startTime=startTime, stopTime=stopTime, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_GridCompSet(driver, clock=internalClock, rc=rc)
+    call ESMF_GridCompSet(driver, clock=driverClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -432,6 +440,191 @@ module DRIVER
     end if
 
   end subroutine SetModelServices
+
+  !-----------------------------------------------------------------------------
+
+  subroutine SetRunClock(driver, rc)
+    type(ESMF_GridComp)  :: driver
+    integer, intent(out) :: rc
+
+    ! local variables
+    type(ESMF_Clock)              :: driverClock, modelClock
+    type(ESMF_State)              :: WRFexportState
+    type(ESMF_Time)               :: startTime
+    type(ESMF_Time)               :: stopTime
+    type(ESMF_GridComp)           :: child
+    integer                       :: year, month, day, hour, minute, second
+    integer(ESMF_KIND_I4)         :: timevals(6)   ! big enough to hold the vars listed above
+    logical                       :: clockIsPresent
+    character(len=160)            :: msgString
+
+    rc = ESMF_SUCCESS
+
+    ! Get WRF export state
+    call NUOPC_DriverGetComp(driver, compLabel="WRF", exportState=WRFexportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get start time from WRF export state
+    call ESMF_AttributeGet(WRFexportState, "ComponentStartTime", timevals, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    year   = timevals(1)
+    month  = timevals(2)
+    day    = timevals(3)
+    hour   = timevals(4)
+    minute = timevals(5)
+    second = timevals(6)
+    call ESMF_TimeSet(startTime, yy=year, mm=month, dd=day, h=hour, m=minute, s=second, &
+      calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get stop time from WRF export state
+    call ESMF_AttributeGet(WRFexportState, "ComponentStopTime", timevals, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    year   = timevals(1)
+    month  = timevals(2)
+    day    = timevals(3)
+    hour   = timevals(4)
+    minute = timevals(5)
+    second = timevals(6)
+    call ESMF_TimeSet(stopTime, yy=year, mm=month, dd=day, h=hour, m=minute, s=second, &
+      calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Print times to log
+    call ESMF_TimePrint(startTime, &
+      preString="Start time read from WRF: ", unit=msgString, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    call ESMF_TimePrint(stopTime, &
+      preString="Stop time read from WRF: ", unit=msgString, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get driver clock
+    call ESMF_GridCompGet(driver, clock=driverClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Set driver clock
+    call ESMF_ClockSet(driverClock, startTime=startTime, stopTime=stopTime, &
+      currTime=startTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Replace driver clock
+    call ESMF_GridCompSet(driver, clock=driverClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Also overwrite model clocks with new times
+    ! This subroutine is performed on individual ranks, so not all model
+    ! clocks will be known, hence clockIsPresent check
+    
+    ! WRF
+    call NUOPC_DriverGetComp(driver, compLabel="WRF", comp=child, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_GridCompGet(child, clockIsPresent=clockIsPresent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    if (clockIsPresent) then
+      call ESMF_GridCompGet(child, clock=modelClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      call ESMF_ClockSet(modelClock, startTime=startTime, stopTime=stopTime, &
+        currTime=startTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      
+      call ESMF_GridCompSet(child, clock=modelClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    end if
+    
+    ! OCN
+    call NUOPC_DriverGetComp(driver, compLabel="OCN", comp=child, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_GridCompGet(child, clockIsPresent=clockIsPresent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    if (clockIsPresent) then
+      call ESMF_GridCompGet(child, clock=modelClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      call ESMF_ClockSet(modelClock, startTime=startTime, stopTime=stopTime, &
+        currTime=startTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      
+      call ESMF_GridCompSet(child, clock=modelClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    end if
+
+  end subroutine SetRunClock
 
   !-----------------------------------------------------------------------------
 
