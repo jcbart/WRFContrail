@@ -449,7 +449,7 @@ module DRIVER
 
     ! local variables
     type(ESMF_Clock)              :: driverClock, modelClock
-    type(ESMF_State)              :: WRFexportState
+    type(ESMF_State)              :: WRFexportState, importState, exportState
     type(ESMF_Time)               :: startTime
     type(ESMF_Time)               :: stopTime
     type(ESMF_GridComp)           :: child
@@ -552,7 +552,7 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
-    ! Also overwrite model clocks with new times
+    ! Also overwrite model clocks and state time stamps with new times
     ! This subroutine is performed on individual ranks, so not all model
     ! clocks will be known, hence clockIsPresent check
     
@@ -570,7 +570,8 @@ module DRIVER
       return  ! bail out
     
     if (clockIsPresent) then
-      call ESMF_GridCompGet(child, clock=modelClock, rc=rc)
+      call ESMF_GridCompGet(child, clock=modelClock, importState=importState, &
+        exportState=exportState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -584,6 +585,18 @@ module DRIVER
         return  ! bail out
       
       call ESMF_GridCompSet(child, clock=modelClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      call NUOPC_SetTimestamp(state=importState, time=startTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      call NUOPC_SetTimestamp(state=exportState, time=startTime, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -604,7 +617,8 @@ module DRIVER
       return  ! bail out
     
     if (clockIsPresent) then
-      call ESMF_GridCompGet(child, clock=modelClock, rc=rc)
+      call ESMF_GridCompGet(child, clock=modelClock, importState=importState, &
+        exportState=exportState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -618,6 +632,18 @@ module DRIVER
         return  ! bail out
       
       call ESMF_GridCompSet(child, clock=modelClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      call NUOPC_SetTimestamp(state=importState, time=startTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      call NUOPC_SetTimestamp(state=exportState, time=startTime, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
