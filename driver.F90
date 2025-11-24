@@ -21,7 +21,8 @@ module DRIVER
     driverSS             => SetServices
 
   use WRF, only: wrfSS => SetServices
-  use OCN, only: ocnSS => SetServices
+  use CM, only: cmSS => SetServices!, CMptr
+  !use CM_interface, only: CMTime, ContrailManager_setStartTime
 
   use NUOPC_Connector, only: cplSS => SetServices
 
@@ -56,6 +57,12 @@ module DRIVER
     ! specialize driver
     call NUOPC_CompSpecialize(driver, specLabel=label_SetModelServices, &
       specRoutine=SetModelServices, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_CompSpecialize(driver, specLabel=label_ModifyCplLists, &
+      specRoutine=ModifyCplLists, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -120,7 +127,7 @@ module DRIVER
     character(len=800)            :: VMLog_char
     logical                       :: VMLog_logical
     character(len=800)            :: WRF_verbosity
-    character(len=800)            :: OCN_verbosity
+    character(len=800)            :: CM_verbosity
     character(len=800)            :: cplFreq_s_char
     integer                       :: cplFreq_s
 
@@ -180,12 +187,12 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    ff = NUOPC_FreeFormatCreate(config, label="OCN_verbosity:", rc=rc)
+    ff = NUOPC_FreeFormatCreate(config, label="CM_verbosity:", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_FreeFormatGetLine(ff, 1, lineString=OCN_verbosity)
+    call NUOPC_FreeFormatGetLine(ff, 1, lineString=CM_verbosity)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -270,9 +277,9 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
-    ! OCN
+    ! Contrail Manager
     ! - set up petList
-    ff = NUOPC_FreeFormatCreate(config, label="OCN_petlist:", rc=rc)
+    ff = NUOPC_FreeFormatCreate(config, label="CM_petlist:", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -290,27 +297,27 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    ! - add the OCN component to Driver
-    call NUOPC_DriverAddComp(driver, "OCN", ocnSS, info=info, &
+    ! - add the Contrail Manager component to Driver
+    call NUOPC_DriverAddComp(driver, "CM", cmSS, info=info, &
       petList=petList, comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_CompAttributeSet(child, name="Verbosity", value=trim(OCN_verbosity), rc=rc)
+    call NUOPC_CompAttributeSet(child, name="Verbosity", value=trim(CM_verbosity), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
     deallocate(petList)
 
-    ! - OCN diagnostics -
+    ! - CM diagnostics -
     isFlag = ESMF_GridCompIsPetLocal(child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    write(msgString,*) "OCN GridCompIsPetLocal: ", isFlag
+    write(msgString,*) "CM GridCompIsPetLocal: ", isFlag
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -326,7 +333,7 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    write(msgString,*) "OCN VmIsCreated: ", isFlag
+    write(msgString,*) "CM VmIsCreated: ", isFlag
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -338,9 +345,9 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
     if (mpiComm==MPI_COMM_NULL) then
-      write(msgString,*) "OCN MPI_COMM_NULL"
+      write(msgString,*) "CM MPI_COMM_NULL"
     else
-      write(msgString,*) "OCN valid MPI_COMM"
+      write(msgString,*) "CM valid MPI_COMM"
     endif
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -348,16 +355,16 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
-    ! SetServices for WRF to OCN
-    call NUOPC_DriverAddComp(driver, srcCompLabel="WRF", dstCompLabel="OCN", &
+    ! SetServices for WRF to CM
+    call NUOPC_DriverAddComp(driver, srcCompLabel="WRF", dstCompLabel="CM", &
       compSetServicesRoutine=cplSS, comp=connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! SetServices for OCN to WRF
-    call NUOPC_DriverAddComp(driver, srcCompLabel="OCN", dstCompLabel="WRF", &
+    ! SetServices for CM to WRF
+    call NUOPC_DriverAddComp(driver, srcCompLabel="CM", dstCompLabel="WRF", &
       compSetServicesRoutine=cplSS, comp=connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -452,6 +459,7 @@ module DRIVER
     type(ESMF_State)              :: WRFexportState, importState, exportState
     type(ESMF_Time)               :: startTime
     type(ESMF_Time)               :: stopTime
+    !type(CMTime)                  :: CMstartTime
     type(ESMF_GridComp)           :: child
     integer                       :: year, month, day, hour, minute, second
     integer(ESMF_KIND_I4)         :: timevals(6)   ! big enough to hold the vars listed above
@@ -479,12 +487,21 @@ module DRIVER
     hour   = timevals(4)
     minute = timevals(5)
     second = timevals(6)
-    call ESMF_TimeSet(startTime, yy=year, mm=month, dd=day, h=hour, m=minute, s=second, &
-      calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
+    call ESMF_TimeSet(startTime, yy=year, mm=month, dd=day, h=hour, m=minute, &
+      s=second, calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+
+    ! While we have these values, set Contrail Manager's internal current time
+    !CMstartTime%yy = year
+    !CMstartTime%mm = month
+    !CMstartTime%dd = day
+    !CMstartTime%h = hour
+    !CMstartTime%m = minute
+    !CMstartTime%s = second
+    !call ContrailManager_setStartTime(CMptr, CMstartTime)
 
     ! Get stop time from WRF export state
     call ESMF_AttributeGet(WRFexportState, "ComponentStopTime", timevals, rc=rc)
@@ -498,8 +515,8 @@ module DRIVER
     hour   = timevals(4)
     minute = timevals(5)
     second = timevals(6)
-    call ESMF_TimeSet(stopTime, yy=year, mm=month, dd=day, h=hour, m=minute, s=second, &
-      calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
+    call ESMF_TimeSet(stopTime, yy=year, mm=month, dd=day, h=hour, m=minute, &
+      s=second, calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -603,8 +620,8 @@ module DRIVER
         return  ! bail out
     end if
     
-    ! OCN
-    call NUOPC_DriverGetComp(driver, compLabel="OCN", comp=child, rc=rc)
+    ! Contrail Manager
+    call NUOPC_DriverGetComp(driver, compLabel="CM", comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -654,6 +671,8 @@ module DRIVER
 
   !-----------------------------------------------------------------------------
 
+  ! This subroutine switches all of the field couplings from bilinear (default)
+  ! to redist
   subroutine ModifyCplLists(driver, rc)
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
@@ -709,11 +728,7 @@ module DRIVER
           return  ! bail out
         ! go through all of the entries in the cplList
         do j=1, cplListSize
-          if (trim(cplList(j))=="sea_surface_height_above_sea_level") then
-            ! switch to ESMF_REGRIDMETHOD_NEAREST_STOD
-            cplList(j) = trim(cplList(j))//":REMAPMETHOD=nearest_stod"// &
-              ":srcMaskValues=1:dstMaskValues=2"
-          endif
+            cplList(j) = trim(cplList(j))//":REMAPMETHOD=redist"
         enddo
         ! store the modified cplList in CplList attribute of connector i
         call NUOPC_CompAttributeSet(connectorList(i), &
@@ -727,85 +742,6 @@ module DRIVER
     enddo
 
     deallocate(connectorList)
-
-    ! section demonstrating access to petLists via NUOPC_DriverGetComp()
-
-    ! directly access WRF component by label
-    nullify(petList)
-    call NUOPC_DriverGetComp(driver, compLabel="WRF", petList=petList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    write (msg,*) "WRF petList= ", petList
-    call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! directly access OCN component by label
-    nullify(petList)
-    call NUOPC_DriverGetComp(driver, compLabel="OCN", petList=petList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    write (msg,*) "OCN petList= ", petList
-    call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! access petLists for all components under the driver that derive from
-    ! ESMF_GridComp. Here this means WRF and OCN.
-    nullify(petLists)
-    call NUOPC_DriverGetComp(driver, petLists=petLists, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    do i=1, size(petLists)
-      if (associated(petLists(i)%ptr)) then
-        write (msg,*) "GridComp petLists(",i,")= ", petLists(i)%ptr
-        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-    enddo
-
-    deallocate(petLists)
-
-    ! access petLists for all components under the driver that derive from
-    ! ESMF_CplComp, i.e. Connectors.
-    nullify(petLists)
-    nullify(connList)
-    call NUOPC_DriverGetComp(driver, compList=connList, petLists=petLists, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    do i=1, size(petLists)
-      if (associated(petLists(i)%ptr)) then
-        write (msg,*) "CplComp  petLists(",i,")= ", petLists(i)%ptr
-        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-    enddo
-
-    deallocate(petLists)
-    deallocate(connList)
 
   end subroutine ModifyCplLists
 

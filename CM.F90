@@ -8,10 +8,10 @@
 ! Licensed under the University of Illinois-NCSA License.
 !==============================================================================
 
-module OCN
+module CM
 
   !-----------------------------------------------------------------------------
-  ! OCN Component.
+  ! COntrail Manager Component.
   !-----------------------------------------------------------------------------
 
   use ESMF
@@ -19,9 +19,15 @@ module OCN
   use NUOPC_Model, &
     modelSS      => SetServices
 
+  ! Contrail Manager interfaces
+  use CM_interface
+  use, intrinsic :: iso_c_binding
+
   implicit none
 
   private
+
+  type(c_ptr), save :: CMptr
 
   public SetServices
 
@@ -55,12 +61,6 @@ module OCN
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_CompSpecialize(model, specLabel=label_SetClock, &
-      specRoutine=SetClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
     call NUOPC_CompSpecialize(model, specLabel=label_DataInitialize, &
       specRoutine=DataInitialize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -87,7 +87,7 @@ module OCN
 
     rc = ESMF_SUCCESS
 
-    call ESMF_LogWrite("OCN in Advertise", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("CM in Advertise", ESMF_LOGMSG_INFO, rc=rc)
 
     ! query for importState and exportState
     call NUOPC_ModelGet(model, importState=importState, &
@@ -105,7 +105,23 @@ module OCN
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_LogWrite("OCN leaving Advertise", ESMF_LOGMSG_INFO, rc=rc) 
+    ! importable field: XLONG
+    call NUOPC_Advertise(importState, StandardName="XLONG", name="XLONG", &
+      TransferOfferGeomObject="cannot provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: Z
+    call NUOPC_Advertise(importState, StandardName="Z", name="Z", &
+      TransferOfferGeomObject="cannot provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_LogWrite("CM leaving Advertise", ESMF_LOGMSG_INFO, rc=rc) 
 
   end subroutine Advertise
 
@@ -117,10 +133,10 @@ module OCN
 
     ! local variables
     type(ESMF_State)        :: importState, exportState
-
+    
     rc = ESMF_SUCCESS
 
-    call ESMF_LogWrite("OCN in RealizeAccepted", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("CM in RealizeAccepted", ESMF_LOGMSG_INFO, rc=rc)
 
     ! query for importState and exportState
     call NUOPC_ModelGet(model, importState=importState, &
@@ -130,6 +146,10 @@ module OCN
       file=__FILE__)) &
       return  ! bail out
 
+    ! Initialise Contrail Manager
+    CMptr = create_ContrailManager()
+    call ContrailManager_init(CMptr)
+
     ! Realize importable field derived from WRF grid object: XLAT
     call NUOPC_Realize(importState, fieldName="XLAT", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -137,49 +157,21 @@ module OCN
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_LogWrite("OCN leaving RealizeAccepted", ESMF_LOGMSG_INFO, rc=rc) 
+    ! Realize importable field derived from WRF grid object: XLONG
+    call NUOPC_Realize(importState, fieldName="XLONG", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Realize importable field derived from WRF grid object: Z
+    call NUOPC_Realize(importState, fieldName="Z", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
   end subroutine RealizeAccepted
-
-  !-----------------------------------------------------------------------------
-
-  subroutine SetClock(model, rc)
-    type(ESMF_GridComp)  :: model
-    integer, intent(out) :: rc
-
-    ! local variables
-    type(ESMF_Clock)              :: clock
-    type(ESMF_TimeInterval)       :: stabilityTimeStep
-
-    rc = ESMF_SUCCESS
-
-    call ESMF_LogWrite("OCN in SetClock", ESMF_LOGMSG_INFO, rc=rc)
-
-    ! query for clock
-    call NUOPC_ModelGet(model, modelClock=clock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! initialize internal clock
-    ! here: parent Clock and stability timeStep determine actual model timeStep
-    !TODO: stabilityTimeStep should be read in from configuation
-    !TODO: or computed from internal Grid information
-    call ESMF_TimeIntervalSet(stabilityTimeStep, s=30, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_CompSetClock(model, clock, stabilityTimeStep, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    
-    call ESMF_LogWrite("OCN leaving SetClock", ESMF_LOGMSG_INFO, rc=rc) 
-
-  end subroutine SetClock
 
   !-----------------------------------------------------------------------------
 
@@ -192,17 +184,22 @@ module OCN
     type(ESMF_State)            :: importState, exportState
     type(ESMF_Time)             :: time
     type(ESMF_Field)            :: field
-    real(ESMF_KIND_R4), pointer :: XLAT_ptr(:,:)
-    logical                     :: neededCurrent
+    real(ESMF_KIND_R4), pointer :: ESMF_ptr_2D(:,:), ESMF_ptr_3D(:,:,:)
+    logical                     :: isAvailable
     character(len=160)          :: msgString
-    integer                     :: ids, ide, jds, jde
+    integer(c_int)              :: ids, ide, jds, jde, kds, kde
+    integer(c_int)              :: i, j, k
+    type(c_ptr)                 :: c_data_ptr
+    real(c_float), pointer      :: f_data_ptr
 
     ! Data dependency flags
     logical, save :: XLAT_satisfied = .false.
+    logical, save :: XLONG_satisfied = .false.
+    logical, save :: Z_satisfied = .false.
 
     rc = ESMF_SUCCESS
 
-    call ESMF_LogWrite("OCN in DataInitialize", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("CM in DataInitialize", ESMF_LOGMSG_INFO, rc=rc)
 
     ! query for clock, importState, and exportState
     call NUOPC_ModelGet(model, modelClock=clock, importState=importState, &
@@ -219,6 +216,8 @@ module OCN
       file=__FILE__)) &
       return  ! bail out
 
+    ! -------------------- XLAT --------------------
+
     ! Get XLAT field
     call ESMF_StateGet(importState, itemName="XLAT", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -227,59 +226,147 @@ module OCN
       return  ! bail out
     
     ! Check if field has been given current time
-    neededCurrent = NUOPC_IsAtTime(field, time, rc=rc)
+    isAvailable = NUOPC_IsAtTime(field, time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    if (neededCurrent) then
+    if (isAvailable) then
       call ESMF_LogWrite("XLAT dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
 
       ! Get pointer from field
-      call ESMF_FieldGet(field, localDe=0, farrayPtr=XLAT_ptr, rc=rc)
+      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
       
-      ids = lbound(XLAT_ptr, dim=1)
-      jds = lbound(XLAT_ptr, dim=2)
-      ide = ubound(XLAT_ptr, dim=1)
-      jde = ubound(XLAT_ptr, dim=2)
+      ids = lbound(ESMF_ptr_2D, dim=1)
+      jds = lbound(ESMF_ptr_2D, dim=2)
+      ide = ubound(ESMF_ptr_2D, dim=1)
+      jde = ubound(ESMF_ptr_2D, dim=2)
 
-      write(msgString, '(A, I3)') "ids = ", ids
-      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-      write(msgString, '(A, I3)') "jds = ", jds
-      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-      write(msgString, '(A, I3)') "ide = ", ide
-      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-      write(msgString, '(A, I3)') "jde = ", jde
-      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-      
-      
-      write(msgString, '(A, E15.5)') "Value of XLAT at (1,1) is ", XLAT_ptr(1, 1)
-      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      
-      write(msgString, '(A, E15.5)') "Value of XLAT at (1,2) is ", XLAT_ptr(1, 2)
-      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
+      !write(msgString, '(A, I3)') "ids = ", ids
+      !call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+
+      call init_XLAT(CMptr, ids, ide, jds, jde)
+
+      do i = ids, ide
+        do j = jds, jde
+          c_data_ptr = get_XLAT_element(CMptr, i, j)
+          call c_f_pointer(c_data_ptr, f_data_ptr)
+          f_data_ptr = ESMF_ptr_2D(i, j)
+        end do
+      end do
       
       XLAT_satisfied = .true.
     else
       call ESMF_LogWrite("XLAT dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
+    ! -------------------- XLONG --------------------
+
+    ! Get XLONG field
+    call ESMF_StateGet(importState, itemName="XLONG", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Check if field has been given current time
+    isAvailable = NUOPC_IsAtTime(field, time, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    if (isAvailable) then
+      call ESMF_LogWrite("XLONG dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
+
+      ! Get pointer from field
+      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      
+      ids = lbound(ESMF_ptr_2D, dim=1)
+      jds = lbound(ESMF_ptr_2D, dim=2)
+      ide = ubound(ESMF_ptr_2D, dim=1)
+      jde = ubound(ESMF_ptr_2D, dim=2)
+
+      call init_XLONG(CMptr, ids, ide, jds, jde)
+
+      do i = ids, ide
+        do j = jds, jde
+          c_data_ptr = get_XLONG_element(CMptr, i, j)
+          call c_f_pointer(c_data_ptr, f_data_ptr)
+          f_data_ptr = ESMF_ptr_2D(i, j)
+        end do
+      end do
+      
+      XLONG_satisfied = .true.
+    else
+      call ESMF_LogWrite("XLONG dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    end if
+
+    ! -------------------- Z --------------------
+
+    ! Get Z field
+    call ESMF_StateGet(importState, itemName="Z", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Check if field has been given current time
+    isAvailable = NUOPC_IsAtTime(field, time, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    if (isAvailable) then
+      call ESMF_LogWrite("Z dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
+
+      ! Get pointer from field
+      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      
+      ids = lbound(ESMF_ptr_3D, dim=1)
+      kds = lbound(ESMF_ptr_3D, dim=2)
+      jds = lbound(ESMF_ptr_3D, dim=3)
+      ide = ubound(ESMF_ptr_3D, dim=1)
+      kde = ubound(ESMF_ptr_3D, dim=2)
+      jde = ubound(ESMF_ptr_3D, dim=3)
+
+      call init_Z(CMptr, ids, ide, jds, jde, kds, kde)
+
+      do i = ids, ide
+        do k = kds, kde
+          do j = jds, jde
+            ! WRF is ikj, CM is ijk
+            c_data_ptr = get_Z_element(CMptr, i, j, k)
+            call c_f_pointer(c_data_ptr, f_data_ptr)
+            f_data_ptr = ESMF_ptr_3D(i, k, j)
+          end do
+        end do
+      end do
+      
+      Z_satisfied = .true.
+    else
+      call ESMF_LogWrite("Z dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    end if
+
+    ! -----------------------------------------------
+
     ! Check if all dependencies satisfied; if so, mark complete
 
-    if (XLAT_satisfied) then
+    if (XLAT_satisfied .and. XLONG_satisfied .and. Z_satisfied) then
       call NUOPC_CompAttributeSet(model, &
         name="InitializeDataComplete", value="true", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -288,7 +375,7 @@ module OCN
         return  ! bail out
     end if
 
-    call ESMF_LogWrite("OCN leaving DataInitialize", ESMF_LOGMSG_INFO, rc=rc) 
+    call ESMF_LogWrite("CM leaving DataInitialize", ESMF_LOGMSG_INFO, rc=rc) 
   
   end subroutine DataInitialize
 
@@ -302,12 +389,15 @@ module OCN
     ! local variables
     type(ESMF_Clock)            :: clock
     type(ESMF_State)            :: importState, exportState
-    type(ESMF_Time)             :: currTime
-    type(ESMF_TimeInterval)     :: timeStep
-    type(ESMF_VM)               :: vm
-    type(ESMF_Field)            :: XLAT_field_in
-    real(ESMF_KIND_R4), pointer :: XLAT_ptr(:,:)
-    integer                     :: currentSsiPe, localPet
+    type(ESMF_Time)             :: ESMF_startTime, ESMF_stopTime
+    type(CMTime_F)              :: CM_startTime, CM_stopTime
+    integer(c_int)              :: year, month, day, hour, minute, second
+    type(ESMF_Field)            :: field
+    real(ESMF_KIND_R4), pointer :: ESMF_ptr_2D(:,:), ESMF_ptr_3D(:,:,:)
+    integer(c_int)              :: ids, ide, jds, jde, kds, kde
+    integer                     :: i, j, k
+    type(c_ptr)                 :: c_data_ptr
+    real(c_float), pointer      :: f_data_ptr
     character(len=160)          :: msgString
 
     rc = ESMF_SUCCESS
@@ -320,49 +410,8 @@ module OCN
       file=__FILE__)) &
       return  ! bail out
 
-    ! Query for VM
-    call ESMF_GridCompGet(model, vm=vm, localPet=localPet, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-#ifdef print_ssi_info
-    call ESMF_VMLog(vm, prefix="OCN Advance(): ", logMsgFlag=ESMF_LOGMSG_INFO, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! Now can use OpenMP for fine grained parallelism...
-    ! Here just write info about the PET-local OpenMP threads to Log.
-!$omp parallel private(msgString, currentSsiPe)
-!$omp critical
-!$    call ESMF_VMGet(vm, currentSsiPe=currentSsiPe)
-!$    write(msgString,'(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)') &
-!$      "OCN: localPet=", localPet, &
-!$      "   thread_num=", omp_get_thread_num(), &
-!$      "   currentSsiPe=", currentSsiPe, &
-!$      "   num_threads=", omp_get_num_threads(), &
-!$      "   max_threads=", omp_get_max_threads(), &
-!$      "   num_procs=", omp_get_num_procs()
-!$    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-!$omp end critical
-!$omp end parallel
-#endif
-
-    ! HERE THE MODEL ADVANCES: currTime -> currTime + timeStep
-
-    ! Because of the way that the internal Clock was set in SetClock(),
-    ! its timeStep is likely smaller than the parent timeStep. As a consequence
-    ! the time interval covered by a single parent timeStep will result in
-    ! multiple calls to the Advance() routine. Every time the currTime
-    ! will come in by one internal timeStep advanced. This goes until the
-    ! stopTime of the internal Clock has been reached.
-
     call ESMF_ClockPrint(clock, options="currTime", &
-      preString="------>Advancing OCN from: ", unit=msgString, rc=rc)
+      preString="------>Advancing CM from: ", unit=msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -373,13 +422,7 @@ module OCN
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_ClockGet(clock, currTime=currTime, timeStep=timeStep, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    call ESMF_TimePrint(currTime + timeStep, &
+    call ESMF_ClockPrint(clock, options="stopTime", &
       preString="---------------------> to: ", unit=msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -391,8 +434,89 @@ module OCN
       file=__FILE__)) &
       return  ! bail out
 
+    ! Get start and stop times from clock
+    call ESMF_ClockGet(clock, currTime=ESMF_startTime, stopTime=ESMF_stopTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Translate start time to CM type
+    call ESMF_TimeGet(ESMF_startTime, yy=year, mm=month, dd=day, h=hour, m=minute, & 
+      s=second, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    CM_startTime%yy = year
+    CM_startTime%mm = month
+    CM_startTime%dd = day
+    CM_startTime%h  = hour
+    CM_startTime%m  = minute
+    CM_startTime%s  = second
+
+    ! Translate stop time to CM type
+    call ESMF_TimeGet(ESMF_stopTime, yy=year, mm=month, dd=day, h=hour, m=minute, & 
+      s=second, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    CM_stopTime%yy = year
+    CM_stopTime%mm = month
+    CM_stopTime%dd = day
+    CM_stopTime%h  = hour
+    CM_stopTime%m  = minute
+    CM_stopTime%s  = second
+
+    ! Imports
+
+    ! -------------------- Z --------------------
+
+    ! Get Z field
+    call ESMF_StateGet(importState, itemName="Z", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ids = lbound(ESMF_ptr_3D, dim=1)
+    kds = lbound(ESMF_ptr_3D, dim=2)
+    jds = lbound(ESMF_ptr_3D, dim=3)
+    ide = ubound(ESMF_ptr_3D, dim=1)
+    kde = ubound(ESMF_ptr_3D, dim=2)
+    jde = ubound(ESMF_ptr_3D, dim=3)
+
+    do i = ids, ide
+      do k = kds, kde
+        do j = jds, jde
+          ! WRF is ikj, CM is ijk
+          c_data_ptr = get_Z_element(CMptr, i, j, k)
+          call c_f_pointer(c_data_ptr, f_data_ptr)
+          f_data_ptr = ESMF_ptr_3D(i, k, j)
+        end do
+      end do
+    end do
+
+    write(msgString, *) "ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+
+    ! -----------------------------------------------
+
+    ! Run the Contrail Manager
+    call ContrailManager_run(CMptr, CM_startTime, CM_stopTime)
+
+    ! Exports
+
   end subroutine Advance
 
   !-----------------------------------------------------------------------------
 
-end module OCN
+end module CM

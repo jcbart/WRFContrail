@@ -97,7 +97,23 @@ module WRF
 
     ! exportable field: XLAT
     call NUOPC_Advertise(exportState, StandardName="XLAT", name="XLAT", &
-      TransferOfferGeomObject="will provide", rc=rc) ! NUOPC name vs internal WRF name
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field: XLONG
+    call NUOPC_Advertise(exportState, StandardName="XLONG", name="XLONG", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field: Z
+    call NUOPC_Advertise(exportState, StandardName="Z", name="Z", &
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -116,8 +132,8 @@ module WRF
     ! local variables
     type(ESMF_State)        :: importState, exportState
     type(ESMF_Clock)        :: clock ! uninitialised, WRF does not use it in init
-    type(ESMF_Grid)         :: grid2D
-    type(ESMF_Grid)         :: grid3D
+    type(ESMF_Grid)         :: grid2D, grid3D
+    character(len=160)      :: msgString
 
     ! WRF domain info
     INTEGER(ESMF_KIND_I4)   :: intvals(19)
@@ -125,7 +141,7 @@ module WRF
 
     rc = ESMF_SUCCESS
 
-    call ESMF_LogWrite("WRF in Realize", ESMF_LOGMSG_INFO, rc=rc) 
+    call ESMF_LogWrite("WRF in Realize", ESMF_LOGMSG_INFO, rc=rc)
 
     ! query for importState and exportState
     call NUOPC_ModelGet(model, importState=importState, &
@@ -159,6 +175,12 @@ module WRF
     jde = intvals(4)
     kds = intvals(5)
     kde = intvals(6)
+
+    call ESMF_LogWrite("Creating grids with dimensions read from WRF:", ESMF_LOGMSG_INFO, rc=rc)
+    write(msgString, '(A,I4,A,I4,A,I4)') "ids = ", ids, ", jds = ", jds, ", kds = ", kds
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+    write(msgString, '(A,I4,A,I4,A,I4)') "ide = ", ide, ", jde = ", jde, ", kde = ", kde
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
     
     ! Create grids with correct size but bogus coords
     ! (we will exclusively use WRF's coords)
@@ -168,14 +190,29 @@ module WRF
       minCornerCoord=(/ real(ids, ESMF_KIND_R8), real(jds, ESMF_KIND_R8) /), &
       maxCornerCoord=(/ real(ide, ESMF_KIND_R8), real(jde, ESMF_KIND_R8) /), &
       coordSys=ESMF_COORDSYS_CART, &
-      staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+      !staggerLocList=(/ ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER /), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    !grid3D = ESMF_GridCreate(distgrid=distgrid3D, rc=rc)
+    ! Match WRF index order: ikj
+    grid3D = ESMF_GridCreateNoPeriDimUfrm( &
+      minIndex=(/ ids, kds, jds /), &
+      maxIndex=(/ ide, kde, jde /), &
+      !minCornerCoord=(/ &
+      !  real(ids, ESMF_KIND_R8), real(kds, ESMF_KIND_R8), real(jds, ESMF_KIND_R8) /), &
+      !maxCornerCoord=(/ &
+      !  real(ide, ESMF_KIND_R8), real(kde, ESMF_KIND_R8), real(jde, ESMF_KIND_R8) /), &
+      minCornerCoord=(/ &
+        1._ESMF_KIND_R8, 1._ESMF_KIND_R8, 1._ESMF_KIND_R8 /), &
+      maxCornerCoord=(/ &
+        1000._ESMF_KIND_R8, 1000._ESMF_KIND_R8, 1000._ESMF_KIND_R8 /), &
+      coordSys=ESMF_COORDSYS_CART, &
+      !staggerLocList=(/ ESMF_STAGGERLOC_CENTER_VCENTER, ESMF_STAGGERLOC_CORNER_VCENTER, &
+      !  ESMF_STAGGERLOC_CENTER_VFACE, ESMF_STAGGERLOC_CORNER_VFACE /), &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -183,6 +220,22 @@ module WRF
 
     ! exportable field on Grid: XLAT
     call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLAT", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field on Grid: XLONG
+    call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLONG", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field on Grid: Z
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="Z", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -202,9 +255,8 @@ module WRF
     ! local variables
     type(ESMF_State)            :: importState, exportState
     type(ESMF_Field)            :: field
-    real(ESMF_KIND_R4), pointer :: XLAT_ptr(:,:)
-    integer                     :: i, j
-    character(len=160)          :: msgString
+    real(ESMF_KIND_R4), pointer :: ESMF_ptr_2D(:,:), ESMF_ptr_3D(:,:,:)
+    integer                     :: i, j, k
 
     ! WRF domain info
     INTEGER(ESMF_KIND_I4)       :: intvals(19)
@@ -235,6 +287,8 @@ module WRF
     kps = intvals(17)
     kpe = intvals(18)
 
+    ! -------------------- XLAT --------------------
+
     ! Get XLAT field
     call ESMF_StateGet(exportState, itemName="XLAT", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -243,7 +297,7 @@ module WRF
       return  ! bail out
     
     ! Get pointer from field
-    call ESMF_FieldGet(field, localDe=0, farrayPtr=XLAT_ptr, rc=rc)
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -251,34 +305,9 @@ module WRF
     
     do i = ips, ipe
       do j = jps, jpe
-        XLAT_ptr(i, j) = head_grid%xlat(i, j)
+        ESMF_ptr_2D(i, j) = head_grid%xlat(i, j)
       end do
     end do
-
-    write(msgString, '(A, E15.5)') "Value of XLAT at (1,1) is ", XLAT_ptr(1, 1)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    write(msgString, '(A, E15.5)') "Value of XLAT at (1,2) is ", XLAT_ptr(1, 2)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    write(msgString, '(A, E15.5)') "Value of head_grid%xlat at (1,1) is ", head_grid%xlat(1, 1)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    write(msgString, '(A, E15.5)') "Value of head_grid%xlat at (1,2) is ", head_grid%xlat(1, 2)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
 
     ! Indicate that the field has been updated
     call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
@@ -286,6 +315,68 @@ module WRF
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+
+    ! -------------------- XLONG --------------------
+
+    ! Get XLONG field
+    call ESMF_StateGet(exportState, itemName="XLONG", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    do i = ips, ipe
+      do j = jps, jpe
+        ESMF_ptr_2D(i, j) = head_grid%xlong(i, j)
+      end do
+    end do
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! -------------------- Z --------------------
+
+    ! Get Z field
+    call ESMF_StateGet(exportState, itemName="Z", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    do i = ips, ipe
+      do k = kpe, kps
+        do j = jps, jpe
+          ESMF_ptr_3D(i, k, j) = head_grid%z(i, k, j)
+        end do
+      end do
+    end do
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -----------------------------------------------
     
     ! Indicate that the model has everything it needs
     call NUOPC_CompAttributeSet(model, &
@@ -309,9 +400,14 @@ module WRF
     ! local variables
     type(ESMF_Clock)            :: clock
     type(ESMF_State)            :: importState, exportState
-    type(ESMF_VM)               :: vm
-    integer                     :: currentSsiPe, localPet
+    type(ESMF_Field)            :: field
+    real(ESMF_KIND_R4), pointer :: ESMF_ptr_2D(:,:), ESMF_ptr_3D(:,:,:)
+    integer                     :: i, j, k
     character(len=160)          :: msgString
+
+    ! WRF domain info
+    INTEGER(ESMF_KIND_I4)       :: intvals(19)
+    integer                     :: ips, ipe, jps, jpe, kps, kpe
 
     rc = ESMF_SUCCESS
 
@@ -323,44 +419,18 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! Query for VM
-    call ESMF_GridCompGet(model, vm=vm, localPet=localPet, rc=rc)
+    ! Get WRF domain info
+    call ESMF_AttributeGet(importState, 'DecompositionIntegers', intvals, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-
-#ifdef print_ssi_info
-    call ESMF_VMLog(vm, prefix="WRF Advance(): ", logMsgFlag=ESMF_LOGMSG_INFO, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! Now can use OpenMP for fine grained parallelism...
-    ! Here just write info about the PET-local OpenMP threads to Log.
-!$omp parallel private(msgString, currentSsiPe)
-!$omp critical
-!$    call ESMF_VMGet(vm, currentSsiPe=currentSsiPe)
-!$    write(msgString,'(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)') &
-!$      "WRF: localPet=", localPet, &
-!$      "   thread_num=", omp_get_thread_num(), &
-!$      "   currentSsiPe=", currentSsiPe, &
-!$      "   num_threads=", omp_get_num_threads(), &
-!$      "   max_threads=", omp_get_max_threads(), &
-!$      "   num_procs=", omp_get_num_procs()
-!$    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-!$omp end critical
-!$omp end parallel
-#endif
-
-    ! HERE THE MODEL ADVANCES: currTime -> currTime + timeStep
-
-    ! Because of the way that the internal Clock was set by default,
-    ! its timeStep is equal to the parent timeStep. As a consequence the
-    ! currTime + timeStep is equal to the stopTime of the internal Clock
-    ! for this call of the Advance() routine.
+    ips = intvals(13)
+    ipe = intvals(14)
+    jps = intvals(15)
+    jpe = intvals(16)
+    kps = intvals(17)
+    kpe = intvals(18)
 
     call ESMF_ClockPrint(clock, options="currTime", &
       preString="------>Advancing WRF from: ", unit=msgString, rc=rc)
@@ -386,7 +456,7 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! Do ESMF_StateGet()
+    ! Imports
 
     call wrf_component_run(model, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -403,6 +473,34 @@ module WRF
     ! Is there any StateAdd then? Maybe not
     
     ! Do ESMF_StateGet() again?
+
+    ! Exports
+
+    ! -------------------- Z --------------------
+
+    ! Get Z field
+    call ESMF_StateGet(exportState, itemName="Z", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    do i = ips, ipe
+      do k = kpe, kps
+        do j = jps, jpe
+          ESMF_ptr_3D(i, k, j) = head_grid%z(i, k, j)
+        end do
+      end do
+    end do
+
+    ! -----------------------------------------------
 
   end subroutine Advance
 

@@ -15,7 +15,7 @@ program CoupledModel
   !-----------------------------------------------------------------------------
 
   use ESMF
-  use NUOPC, only: NUOPC_FreeFormat, NUOPC_FreeFormatCreate, NUOPC_FreeFormatGetLine, NUOPC_FieldDictionaryAddEntry
+  use NUOPC, only: NUOPC_FreeFormat, NUOPC_FreeFormatCreate, NUOPC_FreeFormatGetLine
   use DRIVER, only: drvSS => SetServices
 
   implicit none
@@ -46,11 +46,7 @@ program CoupledModel
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! Extend the NUOPC field dictionary with relevant fields
-  call NUOPC_FieldDictionaryAddEntry("XLAT", "degrees", rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call FieldDictionaryAddEntries()
 
   ! Get VM verbosity from config
   ff = NUOPC_FreeFormatCreate(config, label="VMLog:", rc=rc)
@@ -174,3 +170,33 @@ program CoupledModel
   call ESMF_Finalize()
 
 end program CoupledModel
+
+
+subroutine FieldDictionaryAddEntries()
+
+  use ESMF
+  use NUOPC, only: NUOPC_FieldDictionaryAddEntry
+
+  implicit none
+
+  integer :: rc
+
+  call NUOPC_FieldDictionaryAddEntry("XLAT", "degrees, South is negative", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  call NUOPC_FieldDictionaryAddEntry("XLONG", "degrees, West is negative", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("Z", "metres above sea level", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+end subroutine FieldDictionaryAddEntries
