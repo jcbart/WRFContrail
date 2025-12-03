@@ -720,66 +720,6 @@ CONTAINS
        CALL wrf_error_fatal ( 'wrf_component_init2:  wrf_state_populate failed' )
      ENDIF
 
-     ! examine importState
-     WRITE (str,*) 'wrf_component_init2: EXAMINING importState...'
-     CALL wrf_debug ( 100 , TRIM(str) )
-     CALL ESMF_StateGet( importState, itemCount=itemCount, &
-                         stateintent=stateintent, name=statename, rc=rc )
-     IF ( rc /= ESMF_SUCCESS ) THEN
-       CALL wrf_error_fatal("wrf_component_init2:  ESMF_StateGet(importState) failed B" )
-     ENDIF
-     IF ( stateintent /= ESMF_STATEINTENT_IMPORT ) THEN
-       CALL wrf_error_fatal("wrf_component_init2:  importState is not an import state" )
-     ENDIF
-     WRITE (str,*) 'wrf_component_init2: importState <',TRIM(statename), &
-                   '> itemCount = ', itemCount
-     CALL wrf_debug ( 100 , TRIM(str) )
-     ALLOCATE ( itemNames(itemCount), itemTypes(itemCount) )
-     CALL ESMF_StateGet( importState, itemNameList=itemNames, &
-                         itemtypeList=itemTypes, rc=rc )
-     IF ( rc /= ESMF_SUCCESS ) THEN
-       CALL wrf_error_fatal("wrf_component_init2:  ESMF_StateGet(importState) failed C" )
-     ENDIF
-     DO i=1, itemCount
-       IF ( itemTypes(i) == ESMF_STATEITEM_FIELD ) THEN
-         WRITE(str,*) 'wrf_component_init2: importState contains field <',TRIM(itemNames(i)),'>'
-         CALL wrf_debug ( 100 , TRIM(str) )
-       ENDIF
-     ENDDO
-     DEALLOCATE ( itemNames, itemTypes )
-     WRITE (str,*) 'wrf_component_init2: DONE EXAMINING importState...'
-     CALL wrf_debug ( 100 , TRIM(str) )
-
-     ! examine exportState
-     WRITE (str,*) 'wrf_component_init2: EXAMINING exportState...'
-     CALL wrf_debug ( 100 , TRIM(str) )
-     CALL ESMF_StateGet( exportState, itemCount=itemCount, &
-                         stateintent=stateintent, name=statename, rc=rc )
-     IF ( rc /= ESMF_SUCCESS ) THEN
-       CALL wrf_error_fatal("wrf_component_init2:  ESMF_StateGet(exportState) failed B" )
-     ENDIF
-     IF ( stateintent /= ESMF_STATEINTENT_EXPORT ) THEN
-       CALL wrf_error_fatal("wrf_component_init2:  exportState is not an export state" )
-     ENDIF
-     WRITE (str,*) 'wrf_component_init2: exportState <',TRIM(statename), &
-                   '> itemCount = ', itemCount
-     CALL wrf_debug ( 100 , TRIM(str) )
-     ALLOCATE ( itemNames(itemCount), itemTypes(itemCount) )
-     CALL ESMF_StateGet( exportState, itemNameList=itemNames, &
-                         itemtypeList=itemTypes, rc=rc )
-     IF ( rc /= ESMF_SUCCESS ) THEN
-       CALL wrf_error_fatal("wrf_component_init2:  ESMF_StateGet(exportState) failed C" )
-     ENDIF
-     DO i=1, itemCount
-       IF ( itemTypes(i) == ESMF_STATEITEM_FIELD ) THEN
-         WRITE(str,*) 'wrf_component_init2: exportState contains field <',TRIM(itemNames(i)),'>'
-         CALL wrf_debug ( 100 , TRIM(str) )
-       ENDIF
-     ENDDO
-     DEALLOCATE ( itemNames, itemTypes )
-     WRITE (str,*) 'wrf_component_init2: DONE EXAMINING exportState...'
-     CALL wrf_debug ( 100 , TRIM(str) )
-
      CALL wrf_debug ( 100, 'DEBUG wrf_component_init2():  end' )
 
    END SUBROUTINE wrf_component_init2

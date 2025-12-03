@@ -28,14 +28,6 @@ module CM_interface
     end interface
 
     interface
-        subroutine ContrailManager_setStartTime(CMptr, startTime) bind(C, name='ContrailManager_setStartTime_extern')
-            import :: c_ptr, CMTime_F
-            type(c_ptr), intent(in), value :: CMptr
-            type(CMTime_F), intent(in), value :: startTime
-        end subroutine ContrailManager_setStartTime
-    end interface
-
-    interface
         subroutine ContrailManager_run(CMptr, startTime, stopTime) bind(C, name='ContrailManager_run_extern')
             import :: c_ptr, CMTime_F
             type(c_ptr), intent(in), value :: CMptr
@@ -47,27 +39,11 @@ module CM_interface
     ! Variable inits
 
     interface
-        subroutine init_XLAT(CMptr, ids, ide, jds, jde) bind(C, name='init_XLAT_extern')
-            import :: c_ptr, c_int
-            type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: ids, ide, jds, jde
-        end subroutine init_XLAT
-    end interface
-
-    interface
-        subroutine init_XLONG(CMptr, ids, ide, jds, jde) bind(C, name='init_XLONG_extern')
-            import :: c_ptr, c_int
-            type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: ids, ide, jds, jde
-        end subroutine init_XLONG
-    end interface
-
-    interface
-        subroutine init_Z(CMptr, ids, ide, jds, jde, kds, kde) bind(C, name='init_Z_extern')
+        subroutine init_CM_vars(CMptr, ids, ide, jds, jde, kds, kde) bind(C, name='init_vars_extern')
             import :: c_ptr, c_int
             type(c_ptr), intent(in), value :: CMptr
             integer(c_int), intent(in), value :: ids, ide, jds, jde, kds, kde
-        end subroutine init_Z
+        end subroutine init_CM_vars
     end interface
 
 
@@ -98,6 +74,42 @@ module CM_interface
             integer(c_int), intent(in), value :: i, j, k
             type(c_ptr) :: get_Z_element
         end function get_Z_element
+    end interface
+
+    interface
+        function get_U_element(CMptr, i, j, k) bind(C, name='get_U_element_extern')
+            import :: c_ptr, c_int
+            type(c_ptr), intent(in), value :: CMptr
+            integer(c_int), intent(in), value :: i, j, k
+            type(c_ptr) :: get_U_element
+        end function get_U_element
+    end interface
+
+    interface
+        function get_V_element(CMptr, i, j, k) bind(C, name='get_V_element_extern')
+            import :: c_ptr, c_int
+            type(c_ptr), intent(in), value :: CMptr
+            integer(c_int), intent(in), value :: i, j, k
+            type(c_ptr) :: get_V_element
+        end function get_V_element
+    end interface
+
+    interface
+        function get_W_element(CMptr, i, j, k) bind(C, name='get_W_element_extern')
+            import :: c_ptr, c_int
+            type(c_ptr), intent(in), value :: CMptr
+            integer(c_int), intent(in), value :: i, j, k
+            type(c_ptr) :: get_W_element
+        end function get_W_element
+    end interface
+
+    interface
+        function get_QV_element(CMptr, i, j, k) bind(C, name='get_QV_element_extern')
+            import :: c_ptr, c_int
+            type(c_ptr), intent(in), value :: CMptr
+            integer(c_int), intent(in), value :: i, j, k
+            type(c_ptr) :: get_QV_element
+        end function get_QV_element
     end interface
 
 end module CM_interface
