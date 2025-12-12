@@ -181,19 +181,43 @@ subroutine FieldDictionaryAddEntries()
 
   integer :: rc
 
-  call NUOPC_FieldDictionaryAddEntry("XLAT", "degrees, South is negative", rc)
+  call NUOPC_FieldDictionaryAddEntry("XLONG", "degrees, West is negative", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  call NUOPC_FieldDictionaryAddEntry("XLONG", "degrees, West is negative", rc)
+    
+  call NUOPC_FieldDictionaryAddEntry("XLAT", "degrees, South is negative", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call NUOPC_FieldDictionaryAddEntry("Z", "metres above sea level", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("Z_AT_W", "metres above sea level", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("DRYMASS", "kg", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("T_POT", "Kelvin", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("P", "Pa", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
@@ -218,6 +242,36 @@ subroutine FieldDictionaryAddEntries()
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call NUOPC_FieldDictionaryAddEntry("QV", "kg kg-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("deltaQV", "kg kg-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("deltaQI", "kg kg-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("deltaNI", "# kg-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("QIcon", "kg kg-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("NIcon", "# kg-1", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &

@@ -36,7 +36,7 @@ TARGET=build/CoupledModel
 # Change name as required
 include ./wrflib.mk
 
-# Change name as required
+# Change directory as needed
 CM_LIB = $(CM_DIR)/libcontrailmanager.a
 
 # -----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ WRFIOFLAGS = -fconvert=big-endian -frecord-marker=4
 
 
 # -----------------------------------------------------------------------------
-$(TARGET): CoupledModel.o driver.o WRF.o wrf_ESMFMod.o CM.o CM_interface.o
+$(TARGET): CoupledModel.o driver.o WRF.o wrf_ESMFMod.o CM.o CM_interface.o $(CM_LIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $^ $(WRF_LIB) $(CM_LIB) $(ESMF_F90ESMFLINKLIBS)
 
 # module dependencies:

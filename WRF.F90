@@ -22,11 +22,14 @@ module WRF
   ! WRF modules
   use module_wrf_component_top
   use module_domain, only : head_grid
-  use module_state_description, only : P_qv
+  use module_state_description, only : P_qv, P_qi, P_qni
 
   implicit none
 
   private
+
+  ! WRF domain indices
+  integer, save :: ids = 0, ide = 0, jds = 0, jde = 0, kds = 0, kde = 0
 
   public SetServices
 
@@ -120,6 +123,38 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
+    ! exportable field: Z_AT_W
+    call NUOPC_Advertise(exportState, StandardName="Z_AT_W", name="Z_AT_W", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field: DRYMASS
+    call NUOPC_Advertise(exportState, StandardName="DRYMASS", name="DRYMASS", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field: T_POT
+    call NUOPC_Advertise(exportState, StandardName="T_POT", name="T_POT", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field: P
+    call NUOPC_Advertise(exportState, StandardName="P", name="P", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! exportable field: U
     call NUOPC_Advertise(exportState, StandardName="U", name="U", &
       TransferOfferGeomObject="will provide", rc=rc)
@@ -151,6 +186,46 @@ module WRF
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+
+    ! importable field: deltaQV
+    call NUOPC_Advertise(importState, StandardName="deltaQV", name="deltaQV", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: deltaQI
+    call NUOPC_Advertise(importState, StandardName="deltaQI", name="deltaQI", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: deltaNI
+    call NUOPC_Advertise(importState, StandardName="deltaNI", name="deltaNI", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: QIcon
+    call NUOPC_Advertise(importState, StandardName="QIcon", name="QIcon", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: NIcon
+    call NUOPC_Advertise(importState, StandardName="NIcon", name="NIcon", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
     
     call ESMF_LogWrite("WRF leaving Advertise", ESMF_LOGMSG_INFO, rc=rc) 
 
@@ -170,7 +245,6 @@ module WRF
 
     ! WRF domain info
     INTEGER(ESMF_KIND_I4)   :: intvals(19)
-    integer                 :: ids, ide, jds, jde, kds, kde
 
     rc = ESMF_SUCCESS
 
@@ -223,7 +297,6 @@ module WRF
       minCornerCoord=(/ real(ids, ESMF_KIND_R8), real(jds, ESMF_KIND_R8) /), &
       maxCornerCoord=(/ real(ide, ESMF_KIND_R8), real(jde, ESMF_KIND_R8) /), &
       coordSys=ESMF_COORDSYS_CART, &
-      !staggerLocList=(/ ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER /), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -234,17 +307,11 @@ module WRF
     grid3D = ESMF_GridCreateNoPeriDimUfrm( &
       minIndex=(/ ids, kds, jds /), &
       maxIndex=(/ ide, kde, jde /), &
-      !minCornerCoord=(/ &
-      !  real(ids, ESMF_KIND_R8), real(kds, ESMF_KIND_R8), real(jds, ESMF_KIND_R8) /), &
-      !maxCornerCoord=(/ &
-      !  real(ide, ESMF_KIND_R8), real(kde, ESMF_KIND_R8), real(jde, ESMF_KIND_R8) /), &
       minCornerCoord=(/ &
         1._ESMF_KIND_R8, 1._ESMF_KIND_R8, 1._ESMF_KIND_R8 /), &
       maxCornerCoord=(/ &
         1000._ESMF_KIND_R8, 1000._ESMF_KIND_R8, 1000._ESMF_KIND_R8 /), &
       coordSys=ESMF_COORDSYS_CART, &
-      !staggerLocList=(/ ESMF_STAGGERLOC_CENTER_VCENTER, ESMF_STAGGERLOC_CORNER_VCENTER, &
-      !  ESMF_STAGGERLOC_CENTER_VFACE, ESMF_STAGGERLOC_CORNER_VFACE /), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -269,6 +336,38 @@ module WRF
 
     ! exportable field on Grid: Z
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="Z", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field on Grid: Z_AT_W
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="Z_AT_W", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field on Grid: DRYMASS
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="DRYMASS", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field on Grid: T_POT
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="T_POT", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field on Grid: P
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="P", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -306,6 +405,46 @@ module WRF
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+
+    ! importable field on Grid: deltaQV
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaQV", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: deltaQI
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaQI", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: deltaNI
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaNI", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: QIcon
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="QIcon", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: NIcon
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="NIcon", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
     
     call ESMF_LogWrite("WRF leaving Realize", ESMF_LOGMSG_INFO, rc=rc) 
 
@@ -321,9 +460,10 @@ module WRF
     type(ESMF_State)            :: importState, exportState
     type(ESMF_Field)            :: field
     real(ESMF_KIND_R4), pointer :: ESMF_ptr_2D(:,:), ESMF_ptr_3D(:,:,:)
+    integer                     :: i, j, k
 
     ! WRF domain info
-    INTEGER(ESMF_KIND_I4)       :: intvals(19)
+    integer(ESMF_KIND_I4)       :: intvals(19)
     integer                     :: ips, ipe, jps, jpe, kps, kpe
 
     rc = ESMF_SUCCESS
@@ -423,6 +563,118 @@ module WRF
                                                 head_grid%phb(ips:ipe, kps:kpe-1, jps:jpe) + &
                                                 head_grid%ph_2(ips:ipe, kps+1:kpe, jps:jpe) + &
                                                 head_grid%phb(ips:ipe, kps+1:kpe, jps:jpe))
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -------------------- Z_AT_W --------------------
+
+    ! Get Z_AT_W field
+    call ESMF_StateGet(exportState, itemName="Z_AT_W", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Before WRF runs, Z_AT_W is not initialised, so we calculate it from geopotential
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = 1.d0 / 9.807d0 * &
+                                               (head_grid%ph_2(ips:ipe, kps:kpe, jps:jpe) + &
+                                                head_grid%phb(ips:ipe, kps:kpe, jps:jpe))
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -------------------- DRYMASS --------------------
+
+    ! Get DRYMASS field
+    call ESMF_StateGet(exportState, itemName="DRYMASS", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    do i = ips, ipe
+      do k = kps, kpe
+        do j = jps, jpe
+          ESMF_ptr_3D(i, k, j) = 1.d0 / 9.807d0 * head_grid%area2d(i, j) &
+                                 * (head_grid%mu_2(i, j) + head_grid%mub(i, j)) &
+                                 * (-head_grid%dnw(k))
+        end do
+      end do
+    end do
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -------------------- T_POT --------------------
+
+    ! Get T_POT field
+    call ESMF_StateGet(exportState, itemName="T_POT", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = (300. + head_grid%th_phy_m_t0(ips:ipe, kps:kpe, jps:jpe))
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -------------------- P --------------------
+
+    ! Get P field
+    call ESMF_StateGet(exportState, itemName="P", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = (head_grid%p(ips:ipe, kps:kpe, jps:jpe) + &
+                                              head_grid%pb(ips:ipe, kps:kpe, jps:jpe))
 
     ! Indicate that the field has been updated
     call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
@@ -534,6 +786,26 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
+    ! -------------------- deltaQV --------------------
+
+    ! not initialised
+
+    ! -------------------- deltaQI --------------------
+
+    ! not initialised
+
+    ! -------------------- deltaNI --------------------
+
+    ! not initialised
+
+    ! -------------------- QIcon --------------------
+
+    ! not initialised
+
+    ! -------------------- NIcon --------------------
+
+    ! not initialised
+
     ! -----------------------------------------------
     
     ! Indicate that the model has everything it needs
@@ -561,9 +833,10 @@ module WRF
     type(ESMF_Field)            :: field
     real(ESMF_KIND_R4), pointer :: ESMF_ptr_2D(:,:), ESMF_ptr_3D(:,:,:)
     character(len=160)          :: msgString
+    integer                     :: i, j, k
 
     ! WRF domain info
-    INTEGER(ESMF_KIND_I4)       :: intvals(19)
+    integer(ESMF_KIND_I4)       :: intvals(19)
     integer                     :: ips, ipe, jps, jpe, kps, kpe
 
     rc = ESMF_SUCCESS
@@ -617,6 +890,67 @@ module WRF
 
     ! Imports
 
+    ! -------------------- deltaQV --------------------
+
+    ! Get deltaQV field
+    call ESMF_StateGet(importState, itemName="deltaQV", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) = &
+      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
+    ! -------------------- deltaQI --------------------
+
+    ! Get deltaQI field
+    call ESMF_StateGet(importState, itemName="deltaQI", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) = &
+      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
+    ! -------------------- deltaNI --------------------
+
+    ! Get deltaNI field
+    call ESMF_StateGet(importState, itemName="deltaNI", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) = &
+      head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
+    ! -------------------- QIcon --------------------
+
+    ! -------------------- NIcon --------------------
+
     ! -----------------------------------------------
     
     ! Run WRF
@@ -653,6 +987,90 @@ module WRF
 
     write(msgString, *) "ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
     call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+
+    ! -------------------- Z_AT_W --------------------
+
+    ! Get Z_AT_W field
+    call ESMF_StateGet(exportState, itemName="Z_AT_W", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = head_grid%z_at_w(ips:ipe, kps:kpe, jps:jpe)
+
+    write(msgString, *) "head_grid%z_at_w(i=100, k=10, j=200) = ", head_grid%z_at_w(100, 10, 200)
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+
+    ! -------------------- DRYMASS --------------------
+
+    ! Get DRYMASS field
+    call ESMF_StateGet(exportState, itemName="DRYMASS", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    do i = ips, ipe
+      do k = kps, kpe
+        do j = jps, jpe
+          ESMF_ptr_3D(i, k, j) = 1.d0 / 9.807d0 * head_grid%area2d(i, j) &
+                                 * (head_grid%mu_2(i, j) + head_grid%mub(i, j)) &
+                                 * (-head_grid%dnw(k))
+        end do
+      end do
+    end do
+
+    ! -------------------- T_POT --------------------
+
+    ! Get T_POT field
+    call ESMF_StateGet(exportState, itemName="T_POT", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = (300. + head_grid%th_phy_m_t0(ips:ipe, kps:kpe, jps:jpe))
+
+    ! -------------------- P --------------------
+
+    ! Get P field
+    call ESMF_StateGet(exportState, itemName="P", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = (head_grid%p(ips:ipe, kps:kpe, jps:jpe) + &
+                                              head_grid%pb(ips:ipe, kps:kpe, jps:jpe))
 
     ! -------------------- U --------------------
 

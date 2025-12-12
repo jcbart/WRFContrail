@@ -40,6 +40,7 @@ MODULE module_metadatautils
    PUBLIC GetTimesFromStates
    PUBLIC AttachDecompToState
    PUBLIC GetDecompFromState
+   PUBLIC AttachProjToState
 
    ! private stuff
    CHARACTER (ESMF_MAXSTR) :: str
@@ -480,6 +481,64 @@ CONTAINS
      domdesc = intvals(19)
    END SUBROUTINE GetDecompFromState
 
+   SUBROUTINE AttachProjToState ( state, proj_code, lat1, lon1, knowni, &
+                                  knownj, dx, stdlon, truelat1, truelat2 )
+     TYPE(ESMF_State), INTENT(INOUT) :: state
+     INTEGER, INTENT(IN)             :: proj_code
+     REAL, INTENT(IN)                :: lat1, lon1, knowni, knownj, dx, stdlon, &
+                                        truelat1, truelat2
+     ! locals
+     INTEGER :: rc
+
+     
+     call ESMF_AttributeSet(state, 'proj_code', proj_code, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     call ESMF_AttributeSet(state, 'lat1', lat1, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     call ESMF_AttributeSet(state, 'lon1', lon1, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     call ESMF_AttributeSet(state, 'knowni', knowni, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     call ESMF_AttributeSet(state, 'knownj', knownj, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     call ESMF_AttributeSet(state, 'dx', dx, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     call ESMF_AttributeSet(state, 'stdlon', stdlon, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     call ESMF_AttributeSet(state, 'truelat1', truelat1, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     call ESMF_AttributeSet(state, 'truelat2', truelat2, rc=rc)
+     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+     
+   END SUBROUTINE AttachProjToState
+
 
 
 END MODULE module_metadatautils
@@ -494,13 +553,13 @@ MODULE module_wrf_component_top
 !</DESCRIPTION>
 
    USE ESMF
-   USE module_wrf_top, ONLY : wrf_init, wrf_run, wrf_finalize
+   USE module_wrf_top, ONLY : wrf_init, wrf_run, wrf_finalize, config_flags
    USE module_domain, ONLY : head_grid, get_ijk_from_grid
    USE module_state_description
    USE module_streams
 
    USE module_esmf_extensions
-   USE module_metadatautils, ONLY: AttachTimesToState, AttachDecompToState
+   USE module_metadatautils, ONLY: AttachTimesToState, AttachDecompToState, AttachProjToState
 
 
 
@@ -629,6 +688,9 @@ CONTAINS
                                ims, ime, jms, jme, kms, kme, &
                                ips, ipe, jps, jpe, kps, kpe, &
                                domdesc, bdy_mask )
+     CALL AttachProjToState( exportState, config_flags%map_proj, head_grid%xlat(ips,jps), head_grid%xlong(ips,jps), &
+                             real(ips), real(jps), config_flags%dx, config_flags%stand_lon, &
+                             config_flags%truelat1, config_flags%truelat2)
 
    END SUBROUTINE wrf_component_init1
 
