@@ -213,16 +213,8 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field: QIcon
-    call NUOPC_Advertise(exportState, StandardName="QIcon", name="QIcon", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! exportable field: NIcon
-    call NUOPC_Advertise(exportState, StandardName="NIcon", name="NIcon", &
+    ! exportable field: QIcontrail
+    call NUOPC_Advertise(exportState, StandardName="QIcontrail", name="QIcontrail", &
       TransferOfferGeomObject="cannot provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -356,15 +348,8 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize exportable field derived from WRF grid object: QIcon
-    call NUOPC_Realize(exportState, fieldName="QIcon", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! Realize exportable field derived from WRF grid object: NIcon
-    call NUOPC_Realize(exportState, fieldName="NIcon", rc=rc)
+    ! Realize exportable field derived from WRF grid object: QIcontrail
+    call NUOPC_Realize(exportState, fieldName="QIcontrail", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1410,9 +1395,32 @@ module CM
       end do
     end do
 
-    ! -------------------- QIcon --------------------
+    ! -------------------- QIcontrail --------------------
 
-    ! -------------------- NIcon --------------------
+    ! Get QIcontrail field
+    call ESMF_StateGet(exportState, itemName="QIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    do i = ids, ide-1
+      do k = kds, kde-1
+        do j = jds, jde-1
+          ! WRF is ikj, CM is ijk
+          c_data_ptr = get_QIcontrail_element(CMptr, i, j, k)
+          call c_f_pointer(c_data_ptr, f_data_ptr)
+          f_data_ptr = ESMF_ptr_3D(i, k, j)
+        end do
+      end do
+    end do
 
     ! -----------------------------------------------
 

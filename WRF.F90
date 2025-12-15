@@ -22,7 +22,7 @@ module WRF
   ! WRF modules
   use module_wrf_component_top
   use module_domain, only : head_grid
-  use module_state_description, only : P_qv, P_qi, P_qni
+  use module_state_description, only : P_qv, P_qi, P_qni, P_qicontrail
 
   implicit none
 
@@ -211,16 +211,8 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field: QIcon
-    call NUOPC_Advertise(importState, StandardName="QIcon", name="QIcon", &
-      TransferOfferGeomObject="will provide", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! importable field: NIcon
-    call NUOPC_Advertise(importState, StandardName="NIcon", name="NIcon", &
+    ! importable field: QIcontrail
+    call NUOPC_Advertise(importState, StandardName="QIcontrail", name="QIcontrail", &
       TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -430,16 +422,8 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: QIcon
-    call NUOPC_Realize(importState, grid=grid3D, fieldName="QIcon", &
-      typekind=ESMF_TYPEKIND_R4, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! importable field on Grid: NIcon
-    call NUOPC_Realize(importState, grid=grid3D, fieldName="NIcon", &
+    ! importable field on Grid: QIcontrail
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="QIcontrail", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -798,11 +782,7 @@ module WRF
 
     ! not initialised
 
-    ! -------------------- QIcon --------------------
-
-    ! not initialised
-
-    ! -------------------- NIcon --------------------
+    ! -------------------- QIcontrail --------------------
 
     ! not initialised
 
@@ -909,6 +889,9 @@ module WRF
     head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) = &
       head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
+    write(msgString, *) "head_grid%moist(i=100, k=10, j=200, P_qv) = ", head_grid%moist(100, 10, 200, P_qv)
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+
     ! -------------------- deltaQI --------------------
 
     ! Get deltaQI field
@@ -927,6 +910,9 @@ module WRF
 
     head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) = &
       head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
+    write(msgString, *) "head_grid%moist(i=100, k=10, j=200, P_qi) = ", head_grid%moist(100, 10, 200, P_qi)
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
 
     ! -------------------- deltaNI --------------------
 
@@ -947,9 +933,26 @@ module WRF
     head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) = &
       head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
-    ! -------------------- QIcon --------------------
+    ! -------------------- QIcontrail --------------------
 
-    ! -------------------- NIcon --------------------
+    ! Get QIcontrail field
+    call ESMF_StateGet(importState, itemName="QIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qicontrail) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
+    write(msgString, *) "head_grid%moist(i=100, k=10, j=200, P_qicontrail) = ", head_grid%moist(100, 10, 200, P_qicontrail)
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
 
     ! -----------------------------------------------
     

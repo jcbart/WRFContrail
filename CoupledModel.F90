@@ -265,13 +265,7 @@ subroutine FieldDictionaryAddEntries()
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call NUOPC_FieldDictionaryAddEntry("QIcon", "kg kg-1", rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call NUOPC_FieldDictionaryAddEntry("NIcon", "# kg-1", rc)
+  call NUOPC_FieldDictionaryAddEntry("QIcontrail", "kg kg-1", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &

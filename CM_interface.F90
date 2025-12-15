@@ -199,21 +199,12 @@ module CM_interface
     end interface
 
     interface
-        function get_QIcon_element(CMptr, i, j, k) bind(C, name='get_QIcon_element_extern')
+        function get_QIcontrail_element(CMptr, i, j, k) bind(C, name='get_QIcontrail_element_extern')
             import :: c_ptr, c_int
             type(c_ptr), intent(in), value :: CMptr
             integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_QIcon_element
-        end function get_QIcon_element
-    end interface
-
-    interface
-        function get_NIcon_element(CMptr, i, j, k) bind(C, name='get_NIcon_element_extern')
-            import :: c_ptr, c_int
-            type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_NIcon_element
-        end function get_NIcon_element
+            type(c_ptr) :: get_QIcontrail_element
+        end function get_QIcontrail_element
     end interface
 
 end module CM_interface
