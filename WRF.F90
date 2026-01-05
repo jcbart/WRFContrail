@@ -22,7 +22,7 @@ module WRF
   ! WRF modules
   use module_wrf_component_top
   use module_domain, only : head_grid
-  use module_state_description, only : P_qv, P_qi, P_qni, P_qicontrail
+  use module_state_description, only : P_qv, P_qi, P_qni
 
   implicit none
 
@@ -949,9 +949,9 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qicontrail) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+    head_grid%qicontrail(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
-    write(msgString, *) "head_grid%moist(i=100, k=10, j=200, P_qicontrail) = ", head_grid%moist(100, 10, 200, P_qicontrail)
+    write(msgString, *) "head_grid%qicontrail(i=100, k=10, j=200) = ", head_grid%qicontrail(100, 10, 200)
     call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
 
     ! -----------------------------------------------
