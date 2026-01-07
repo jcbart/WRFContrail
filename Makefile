@@ -37,7 +37,7 @@ TARGET=build/CoupledModel
 include ./wrflib.mk
 
 # Change directory as needed
-CM_LIB = $(CM_DIR)/libcontrailmanager.a
+CM_LIB = $(CM_DIR)/build/libcontrailmanager.a
 
 # -----------------------------------------------------------------------------
 WRFIOFLAGS = -fconvert=big-endian -frecord-marker=4

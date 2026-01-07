@@ -32,6 +32,7 @@ module CM
 
   ! WRF domain indices
   integer(c_int), save :: ids = 0, ide = 0, jds = 0, jde = 0, kds = 0, kde = 0
+  integer(c_int), save :: i_size = 0, j_size = 0, k_size = 0
 
   public SetServices
 
@@ -372,8 +373,8 @@ module CM
     logical                     :: isAvailable
     character(len=160)          :: msgString
     integer(c_int)              :: i, j, k
-    type(c_ptr)                 :: c_data_ptr
-    real(c_float), pointer      :: f_data_ptr
+    type(c_ptr)                 :: c_arr_ptr
+    real(c_float), pointer      :: f_arr_ptr_2D(:,:), f_arr_ptr_3D(:,:,:)
     integer(c_int)              :: proj_code
     real(c_float)               :: lat1, lon1, knowni, knownj, dx, stdlon, &
                                    truelat1, truelat2
@@ -444,16 +445,22 @@ module CM
       kde = ubound(ESMF_ptr_3D, dim=2)
       jde = ubound(ESMF_ptr_3D, dim=3)
 
+      ! Dimension sizes in CM (1 less than in WRF)
+      i_size = ide - ids
+      j_size = jde - jds
+      k_size = kde - kds
+
       call init_CM_vars(CMptr, ids, ide-1, jds, jde-1, kds, kde-1)
       vars_initialised = .true.
 
-      do i = ids, ide-1
-        do k = kds, kde-1
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_Z_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_Z(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -491,11 +498,13 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do j = jds, jde-1
-          c_data_ptr = get_XLONG_element(CMptr, i, j)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_2D(i, j)
+      c_arr_ptr = get_XLONG(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_2D, [j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          f_arr_ptr_2D(j, i) = ESMF_ptr_2D(ids+i-1, jds+j-1)
         end do
       end do
       
@@ -529,11 +538,13 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do j = jds, jde-1
-          c_data_ptr = get_XLAT_element(CMptr, i, j)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_2D(i, j)
+      c_arr_ptr = get_XLAT(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_2D, [j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          f_arr_ptr_2D(j, i) = ESMF_ptr_2D(ids+i-1, jds+j-1)
         end do
       end do
       
@@ -567,13 +578,15 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do k = kds, kde ! Z_AT_W is only staggered field
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_Z_AT_W_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_Z_AT_W(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size+1, j_size, i_size])
+
+      ! Z_AT_W is only staggered field
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size+1
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -608,13 +621,14 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do k = kds, kde-1
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_DRYMASS_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_DRYMASS(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -649,13 +663,14 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do k = kds, kde-1
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_T_POT_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_T_POT(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -690,13 +705,14 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do k = kds, kde-1
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_P_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_P(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -731,13 +747,14 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do k = kds, kde-1
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_U_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_U(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -772,13 +789,14 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do k = kds, kde-1
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_V_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_V(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -813,13 +831,14 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do k = kds, kde-1
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_W_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_W(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -854,13 +873,14 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      do i = ids, ide-1
-        do k = kds, kde-1
-          do j = jds, jde-1
-            ! WRF is ikj, CM is ijk
-            c_data_ptr = get_QV_element(CMptr, i, j, k)
-            call c_f_pointer(c_data_ptr, f_data_ptr)
-            f_data_ptr = ESMF_ptr_3D(i, k, j)
+      c_arr_ptr = get_QV(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
           end do
         end do
       end do
@@ -970,8 +990,8 @@ module CM
     type(ESMF_Field)            :: field
     real(ESMF_KIND_R4), pointer :: ESMF_ptr_2D(:,:), ESMF_ptr_3D(:,:,:)
     integer                     :: i, j, k
-    type(c_ptr)                 :: c_data_ptr
-    real(c_float), pointer      :: f_data_ptr
+    type(c_ptr)                 :: c_arr_ptr
+    real(c_float), pointer      :: f_arr_ptr_2D(:,:), f_arr_ptr_3D(:,:,:)
     character(len=160)          :: msgString
 
     rc = ESMF_SUCCESS
@@ -1063,13 +1083,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_Z_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_Z(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1093,13 +1114,15 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde ! Z_AT_W is only staggered field
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_Z_AT_W_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_Z_AT_W(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size+1, j_size, i_size])
+
+    ! Z_AT_W is only staggered field
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size+1
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1123,13 +1146,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_DRYMASS_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_DRYMASS(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1153,13 +1177,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_T_POT_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_T_POT(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1183,13 +1208,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_P_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_P(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1213,13 +1239,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_U_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_U(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1240,13 +1267,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_V_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_V(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1267,13 +1295,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_W_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_W(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1294,13 +1323,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_QV_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_QV(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
         end do
       end do
     end do
@@ -1330,13 +1360,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_deltaQV_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_deltaQV(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
         end do
       end do
     end do
@@ -1357,13 +1388,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_deltaQI_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_deltaQI(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
         end do
       end do
     end do
@@ -1384,13 +1416,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_deltaNI_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_deltaNI(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
         end do
       end do
     end do
@@ -1411,13 +1444,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    do i = ids, ide-1
-      do k = kds, kde-1
-        do j = jds, jde-1
-          ! WRF is ikj, CM is ijk
-          c_data_ptr = get_QIcontrail_element(CMptr, i, j, k)
-          call c_f_pointer(c_data_ptr, f_data_ptr)
-          f_data_ptr = ESMF_ptr_3D(i, k, j)
+    c_arr_ptr = get_QIcontrail(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
         end do
       end do
     end do

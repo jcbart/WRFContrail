@@ -58,7 +58,7 @@ module CM_interface
     end interface
 
 
-    ! Variable inits
+    ! Variable init
 
     interface
         subroutine init_CM_vars(CMptr, ids, ide, jds, jde, kds, kde) &
@@ -73,138 +73,123 @@ module CM_interface
     ! Variable getters
 
     interface
-        function get_XLAT_element(CMptr, i, j) bind(C, name='get_XLAT_element_extern')
-            import :: c_ptr, c_int
+        function get_XLAT(CMptr) bind(C, name='get_XLAT_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j
-            type(c_ptr) :: get_XLAT_element
-        end function get_XLAT_element
+            type(c_ptr) :: get_XLAT
+        end function get_XLAT
     end interface
 
     interface
-        function get_XLONG_element(CMptr, i, j) bind(C, name='get_XLONG_element_extern')
-            import :: c_ptr, c_int
+        function get_XLONG(CMptr) bind(C, name='get_XLONG_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j
-            type(c_ptr) :: get_XLONG_element
-        end function get_XLONG_element
+            type(c_ptr) :: get_XLONG
+        end function get_XLONG
     end interface
 
     interface
-        function get_Z_element(CMptr, i, j, k) bind(C, name='get_Z_element_extern')
-            import :: c_ptr, c_int
+        function get_Z(CMptr) bind(C, name='get_Z_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_Z_element
-        end function get_Z_element
+            type(c_ptr) :: get_Z
+        end function get_Z
     end interface
 
     interface
-        function get_Z_AT_W_element(CMptr, i, j, k) bind(C, name='get_Z_AT_W_element_extern')
-            import :: c_ptr, c_int
+        function get_Z_AT_W(CMptr) bind(C, name='get_Z_AT_W_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_Z_AT_W_element
-        end function get_Z_AT_W_element
+            type(c_ptr) :: get_Z_AT_W
+        end function get_Z_AT_W
     end interface
 
     interface
-        function get_DRYMASS_element(CMptr, i, j, k) bind(C, name='get_DRYMASS_element_extern')
-            import :: c_ptr, c_int
+        function get_DRYMASS(CMptr) bind(C, name='get_DRYMASS_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_DRYMASS_element
-        end function get_DRYMASS_element
+            type(c_ptr) :: get_DRYMASS
+        end function get_DRYMASS
     end interface
 
     interface
-        function get_T_POT_element(CMptr, i, j, k) bind(C, name='get_T_POT_element_extern')
-            import :: c_ptr, c_int
+        function get_T_POT(CMptr) bind(C, name='get_T_POT_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_T_POT_element
-        end function get_T_POT_element
+            type(c_ptr) :: get_T_POT
+        end function get_T_POT
     end interface
 
     interface
-        function get_P_element(CMptr, i, j, k) bind(C, name='get_P_element_extern')
-            import :: c_ptr, c_int
+        function get_P(CMptr) bind(C, name='get_P_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_P_element
-        end function get_P_element
+            type(c_ptr) :: get_P
+        end function get_P
     end interface
 
     interface
-        function get_U_element(CMptr, i, j, k) bind(C, name='get_U_element_extern')
-            import :: c_ptr, c_int
+        function get_U(CMptr) bind(C, name='get_U_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_U_element
-        end function get_U_element
+            type(c_ptr) :: get_U
+        end function get_U
     end interface
 
     interface
-        function get_V_element(CMptr, i, j, k) bind(C, name='get_V_element_extern')
-            import :: c_ptr, c_int
+        function get_V(CMptr) bind(C, name='get_V_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_V_element
-        end function get_V_element
+            type(c_ptr) :: get_V
+        end function get_V
     end interface
 
     interface
-        function get_W_element(CMptr, i, j, k) bind(C, name='get_W_element_extern')
-            import :: c_ptr, c_int
+        function get_W(CMptr) bind(C, name='get_W_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_W_element
-        end function get_W_element
+            type(c_ptr) :: get_W
+        end function get_W
     end interface
 
     interface
-        function get_QV_element(CMptr, i, j, k) bind(C, name='get_QV_element_extern')
-            import :: c_ptr, c_int
+        function get_QV(CMptr) bind(C, name='get_QV_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_QV_element
-        end function get_QV_element
+            type(c_ptr) :: get_QV
+        end function get_QV
     end interface
 
     interface
-        function get_deltaQV_element(CMptr, i, j, k) bind(C, name='get_deltaQV_element_extern')
-            import :: c_ptr, c_int
+        function get_deltaQV(CMptr) bind(C, name='get_deltaQV_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_deltaQV_element
-        end function get_deltaQV_element
+            type(c_ptr) :: get_deltaQV
+        end function get_deltaQV
     end interface
 
     interface
-        function get_deltaQI_element(CMptr, i, j, k) bind(C, name='get_deltaQI_element_extern')
-            import :: c_ptr, c_int
+        function get_deltaQI(CMptr) bind(C, name='get_deltaQI_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_deltaQI_element
-        end function get_deltaQI_element
+            type(c_ptr) :: get_deltaQI
+        end function get_deltaQI
     end interface
 
     interface
-        function get_deltaNI_element(CMptr, i, j, k) bind(C, name='get_deltaNI_element_extern')
-            import :: c_ptr, c_int
+        function get_deltaNI(CMptr) bind(C, name='get_deltaNI_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_deltaNI_element
-        end function get_deltaNI_element
+            type(c_ptr) :: get_deltaNI
+        end function get_deltaNI
     end interface
 
     interface
-        function get_QIcontrail_element(CMptr, i, j, k) bind(C, name='get_QIcontrail_element_extern')
-            import :: c_ptr, c_int
+        function get_QIcontrail(CMptr) bind(C, name='get_QIcontrail_extern')
+            import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: i, j, k
-            type(c_ptr) :: get_QIcontrail_element
-        end function get_QIcontrail_element
+            type(c_ptr) :: get_QIcontrail
+        end function get_QIcontrail
     end interface
 
 end module CM_interface
