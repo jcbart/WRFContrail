@@ -687,10 +687,6 @@ module DRIVER
     type(ESMF_CplComp), pointer     :: connectorList(:)
     integer                         :: i, j, cplListSize
     character(len=160), allocatable :: cplList(:)
-    character(len=160)              :: tempString
-    integer, pointer                :: petList(:)
-    type(ESMF_PtrInt1D), pointer    :: petLists(:)
-    type(ESMF_CplComp),  pointer    :: connList(:)
 
     rc = ESMF_SUCCESS
 

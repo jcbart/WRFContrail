@@ -28,9 +28,6 @@ module WRF
 
   private
 
-  ! WRF domain indices
-  integer, save :: ids = 0, ide = 0, jds = 0, jde = 0, kds = 0, kde = 0
-
   public SetServices
 
   !-----------------------------------------------------------------------------
@@ -230,17 +227,33 @@ module WRF
     integer, intent(out) :: rc
 
     ! local variables
+    type(ESMF_VM)           :: vm
     type(ESMF_State)        :: importState, exportState
     type(ESMF_Clock)        :: clock ! uninitialised, WRF does not use it in init
+    integer                 :: petCount
+    type(ESMF_DistGrid)     :: distgrid2D, distgrid3D
     type(ESMF_Grid)         :: grid2D, grid3D
     character(len=160)      :: msgString
+    integer                 :: i
 
     ! WRF domain info
-    INTEGER(ESMF_KIND_I4)   :: intvals(19)
+    integer(ESMF_KIND_I4)              :: intvals(19)
+    integer                            :: ids, ide, jds, jde, kds, kde, &
+                                          ips, ipe, jps, jpe, kps, kpe
+    integer(ESMF_KIND_I4)              :: patchIndicesSend(6) ! (/ ips, kps, jps, ipe, kpe, jpe /)
+    integer(ESMF_KIND_I4), allocatable :: patchIndicesRecv(:)
+    integer, allocatable               :: deBlockList2D(:,:,:), deBlockList3D(:,:,:)
 
     rc = ESMF_SUCCESS
 
     call ESMF_LogWrite("WRF in Realize", ESMF_LOGMSG_INFO, rc=rc)
+
+    ! query for vm, and petCount
+    call ESMF_GridCompGet(model, vm=vm, petCount=petCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
     ! query for importState and exportState
     call NUOPC_ModelGet(model, importState=importState, &
@@ -274,41 +287,85 @@ module WRF
     jde = intvals(4)
     kds = intvals(5)
     kde = intvals(6)
+    ips = intvals(13)
+    ipe = intvals(14)
+    jps = intvals(15)
+    jpe = intvals(16)
+    kps = intvals(17)
+    kpe = intvals(18)
+
+    patchIndicesSend = (/ ips, kps, jps, ipe, kpe, jpe /)
+
+    allocate(patchIndicesRecv(6*petCount))
+    allocate(deBlockList2D(2, 2, petCount)) ! (dims, 2 (min, max), petCount)
+    allocate(deBlockList3D(3, 2, petCount)) ! (dims, 2 (min, max), petCount)
+
+    ! Each PET (MPI rank) sends local patch indices and receives all patch indices
+    call ESMF_VMAllGather(vm, patchIndicesSend, patchIndicesRecv, count=6, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Create decomposition element block lists (deBlockLists)
+    ! to tell ESMF how WRF is decomposing the grid by MPI rank
+    do i=1, petCount
+      ! min indices
+      deBlockList2D(:,1,i) = (/ patchIndicesRecv(6*(i-1)+1), patchIndicesRecv(6*(i-1)+3) /)
+      deBlockList3D(:,1,i) = patchIndicesRecv(6*(i-1)+1 : 6*(i-1)+3)
+      ! max indices
+      deBlockList2D(:,2,i) = (/ patchIndicesRecv(6*(i-1)+4), patchIndicesRecv(6*(i-1)+6) /)
+      deBlockList3D(:,2,i) = patchIndicesRecv(6*(i-1)+4:6*(i-1)+6)
+    end do
 
     call ESMF_LogWrite("Creating grids with dimensions read from WRF:", ESMF_LOGMSG_INFO, rc=rc)
     write(msgString, '(A,I4,A,I4,A,I4)') "ids = ", ids, ", jds = ", jds, ", kds = ", kds
     call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
     write(msgString, '(A,I4,A,I4,A,I4)') "ide = ", ide, ", jde = ", jde, ", kde = ", kde
     call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-    
-    ! Create grids with correct size but bogus coords
-    ! (we will exclusively use WRF's coords)
-    grid2D = ESMF_GridCreateNoPeriDimUfrm( &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    distgrid2D = ESMF_DistGridCreate( &
       minIndex=(/ ids, jds /), &
       maxIndex=(/ ide, jde /), &
-      minCornerCoord=(/ real(ids, ESMF_KIND_R8), real(jds, ESMF_KIND_R8) /), &
-      maxCornerCoord=(/ real(ide, ESMF_KIND_R8), real(jde, ESMF_KIND_R8) /), &
-      coordSys=ESMF_COORDSYS_CART, &
+      deBlockList=deBlockList2D, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Match WRF index order: ikj
-    grid3D = ESMF_GridCreateNoPeriDimUfrm( &
+    distgrid3D = ESMF_DistGridCreate( &
       minIndex=(/ ids, kds, jds /), &
       maxIndex=(/ ide, kde, jde /), &
-      minCornerCoord=(/ &
-        1._ESMF_KIND_R8, 1._ESMF_KIND_R8, 1._ESMF_KIND_R8 /), &
-      maxCornerCoord=(/ &
-        1000._ESMF_KIND_R8, 1000._ESMF_KIND_R8, 1000._ESMF_KIND_R8 /), &
-      coordSys=ESMF_COORDSYS_CART, &
+      deBlockList=deBlockList3D, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+
+    ! Create grids from distgrids; no need for coord info since we redist not regrid
+    grid2D = ESMF_GridCreate(distgrid2D, &
+      indexFlag=ESMF_INDEX_GLOBAL, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    grid3D = ESMF_GridCreate(distgrid3D, &
+      indexFlag=ESMF_INDEX_GLOBAL, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    deallocate(patchIndicesRecv, deBlockList2D, deBlockList3D)
 
     ! exportable field on Grid: XLAT
     call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLAT", &
@@ -599,9 +656,9 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
     
-    do i = ips, ipe
+    do j = jps, jpe
       do k = kps, kpe
-        do j = jps, jpe
+        do i = ips, ipe
           ESMF_ptr_3D(i, k, j) = 1.d0 / 9.807d0 * head_grid%area2d(i, j) &
                                  * (head_grid%mu_2(i, j) + head_grid%mub(i, j)) &
                                  * (-head_grid%dnw(k))
@@ -889,9 +946,6 @@ module WRF
     head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) = &
       head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
-    write(msgString, *) "head_grid%moist(i=100, k=10, j=200, P_qv) = ", head_grid%moist(100, 10, 200, P_qv)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-
     ! -------------------- deltaQI --------------------
 
     ! Get deltaQI field
@@ -910,9 +964,6 @@ module WRF
 
     head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) = &
       head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
-
-    write(msgString, *) "head_grid%moist(i=100, k=10, j=200, P_qi) = ", head_grid%moist(100, 10, 200, P_qi)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
 
     ! -------------------- deltaNI --------------------
 
@@ -951,9 +1002,6 @@ module WRF
 
     head_grid%qicontrail(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
-    write(msgString, *) "head_grid%qicontrail(i=100, k=10, j=200) = ", head_grid%qicontrail(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-
     ! -----------------------------------------------
     
     ! Run WRF
@@ -985,12 +1033,6 @@ module WRF
 
     ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = head_grid%z(ips:ipe, kps:kpe, jps:jpe)
 
-    write(msgString, *) "head_grid%z(i=100, k=10, j=200) = ", head_grid%z(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-
-    write(msgString, *) "ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-
     ! -------------------- Z_AT_W --------------------
 
     ! Get Z_AT_W field
@@ -1009,9 +1051,6 @@ module WRF
 
     ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = head_grid%z_at_w(ips:ipe, kps:kpe, jps:jpe)
 
-    write(msgString, *) "head_grid%z_at_w(i=100, k=10, j=200) = ", head_grid%z_at_w(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-
     ! -------------------- DRYMASS --------------------
 
     ! Get DRYMASS field
@@ -1028,9 +1067,9 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
     
-    do i = ips, ipe
+    do j = jps, jpe
       do k = kps, kpe
-        do j = jps, jpe
+        do i = ips, ipe
           ESMF_ptr_3D(i, k, j) = 1.d0 / 9.807d0 * head_grid%area2d(i, j) &
                                  * (head_grid%mu_2(i, j) + head_grid%mub(i, j)) &
                                  * (-head_grid%dnw(k))
