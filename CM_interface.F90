@@ -10,7 +10,7 @@ module CM_interface
         integer(c_int) :: dd
         integer(c_int) :: h
         integer(c_int) :: m
-        integer(c_int) :: s
+        real(c_float) :: s
     end type CMTime_F
 
     interface
@@ -153,6 +153,22 @@ module CM_interface
     end interface
 
     interface
+        function get_TNSR(CMptr) bind(C, name='get_TNSR_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_TNSR
+        end function get_TNSR
+    end interface
+
+    interface
+        function get_OLR(CMptr) bind(C, name='get_OLR_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_OLR
+        end function get_OLR
+    end interface
+
+    interface
         function get_QV(CMptr) bind(C, name='get_QV_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
@@ -166,6 +182,14 @@ module CM_interface
             type(c_ptr), intent(in), value :: CMptr
             type(c_ptr) :: get_deltaQV
         end function get_deltaQV
+    end interface
+
+    interface
+        function get_QI(CMptr) bind(C, name='get_QI_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_QI
+        end function get_QI
     end interface
 
     interface

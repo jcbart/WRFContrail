@@ -241,6 +241,18 @@ subroutine FieldDictionaryAddEntries()
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  call NUOPC_FieldDictionaryAddEntry("TNSR", "W m-2", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("OLR", "W m-2", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call NUOPC_FieldDictionaryAddEntry("QV", "kg kg-1", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -248,6 +260,12 @@ subroutine FieldDictionaryAddEntries()
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call NUOPC_FieldDictionaryAddEntry("deltaQV", "kg kg-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("QI", "kg kg-1", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &

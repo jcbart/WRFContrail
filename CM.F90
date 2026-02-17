@@ -182,6 +182,22 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
+    ! importable field: TNSR
+    call NUOPC_Advertise(importState, StandardName="TNSR", name="TNSR", &
+      TransferOfferGeomObject="cannot provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: OLR
+    call NUOPC_Advertise(importState, StandardName="OLR", name="OLR", &
+      TransferOfferGeomObject="cannot provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! importable field: QV
     call NUOPC_Advertise(importState, StandardName="QV", name="QV", &
       TransferOfferGeomObject="cannot provide", rc=rc)
@@ -192,6 +208,14 @@ module CM
 
     ! exportable field: deltaQV
     call NUOPC_Advertise(exportState, StandardName="deltaQV", name="deltaQV", &
+      TransferOfferGeomObject="cannot provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: QI
+    call NUOPC_Advertise(importState, StandardName="QI", name="QI", &
       TransferOfferGeomObject="cannot provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -321,6 +345,20 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
+    ! Realize importable field derived from WRF grid object: TNSR
+    call NUOPC_Realize(importState, fieldName="TNSR", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Realize importable field derived from WRF grid object: OLR
+    call NUOPC_Realize(importState, fieldName="OLR", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! Realize importable field derived from WRF grid object: QV
     call NUOPC_Realize(importState, fieldName="QV", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -330,6 +368,13 @@ module CM
 
     ! Realize exportable field derived from WRF grid object: deltaQV
     call NUOPC_Realize(exportState, fieldName="deltaQV", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Realize importable field derived from WRF grid object: QI
+    call NUOPC_Realize(importState, fieldName="QI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -391,7 +436,10 @@ module CM
     logical, save :: U_satisfied = .false.
     logical, save :: V_satisfied = .false.
     logical, save :: W_satisfied = .false.
+    logical, save :: TNSR_satisfied = .false.
+    logical, save :: OLR_satisfied = .false.
     logical, save :: QV_satisfied = .false.
+    logical, save :: QI_satisfied = .false.
     logical, save :: proj_satisfied = .false.
 
     rc = ESMF_SUCCESS
@@ -849,6 +897,86 @@ module CM
       call ESMF_LogWrite("W dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
+    ! -------------------- TNSR --------------------
+
+    ! Get TNSR field
+    call ESMF_StateGet(importState, itemName="TNSR", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Check if field has been given current time
+    isAvailable = NUOPC_IsAtTime(field, time, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    if (isAvailable .and. vars_initialised) then
+      ! Get pointer from field
+      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      c_arr_ptr = get_TNSR(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_2D, [j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          f_arr_ptr_2D(j, i) = ESMF_ptr_2D(ids+i-1, jds+j-1)
+        end do
+      end do
+      
+      TNSR_satisfied = .true.
+      call ESMF_LogWrite("TNSR dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    else
+      call ESMF_LogWrite("TNSR dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    end if
+
+    ! -------------------- OLR --------------------
+
+    ! Get OLR field
+    call ESMF_StateGet(importState, itemName="OLR", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Check if field has been given current time
+    isAvailable = NUOPC_IsAtTime(field, time, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    if (isAvailable .and. vars_initialised) then
+      ! Get pointer from field
+      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      c_arr_ptr = get_OLR(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_2D, [j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          f_arr_ptr_2D(j, i) = ESMF_ptr_2D(ids+i-1, jds+j-1)
+        end do
+      end do
+      
+      OLR_satisfied = .true.
+      call ESMF_LogWrite("OLR dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    else
+      call ESMF_LogWrite("OLR dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    end if
+
     ! -------------------- QV --------------------
 
     ! Get QV field
@@ -889,6 +1017,48 @@ module CM
       call ESMF_LogWrite("QV dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
     else
       call ESMF_LogWrite("QV dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    end if
+
+    ! -------------------- QI --------------------
+
+    ! Get QI field
+    call ESMF_StateGet(importState, itemName="QI", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Check if field has been given current time
+    isAvailable = NUOPC_IsAtTime(field, time, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    if (isAvailable .and. vars_initialised) then
+      ! Get pointer from field
+      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      c_arr_ptr = get_QI(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
+          end do
+        end do
+      end do
+      
+      QI_satisfied = .true.
+      call ESMF_LogWrite("QI dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    else
+      call ESMF_LogWrite("QI dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- Projection variables --------------------
@@ -960,7 +1130,10 @@ module CM
         U_satisfied .and. &
         V_satisfied .and. &
         W_satisfied .and. &
+        TNSR_satisfied .and. &
+        OLR_satisfied .and. &
         QV_satisfied .and. &
+        QI_satisfied .and. &
         proj_satisfied) then
       call NUOPC_CompAttributeSet(model, &
         name="InitializeDataComplete", value="true", rc=rc)
@@ -977,7 +1150,6 @@ module CM
   !-----------------------------------------------------------------------------
 
   subroutine Advance(model, rc)
-!$  use omp_lib
     type(ESMF_GridComp)  :: model
     integer, intent(out) :: rc
 
@@ -1307,6 +1479,58 @@ module CM
       end do
     end do
 
+    ! -------------------- TNSR --------------------
+
+    ! Get TNSR field
+    call ESMF_StateGet(importState, itemName="TNSR", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    c_arr_ptr = get_TNSR(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_2D, [j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        f_arr_ptr_2D(j, i) = ESMF_ptr_2D(ids+i-1, jds+j-1)
+      end do
+    end do
+
+    ! -------------------- OLR --------------------
+
+    ! Get TNSR field
+    call ESMF_StateGet(importState, itemName="OLR", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    c_arr_ptr = get_OLR(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_2D, [j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        f_arr_ptr_2D(j, i) = ESMF_ptr_2D(ids+i-1, jds+j-1)
+      end do
+    end do
+
     ! -------------------- QV --------------------
 
     ! Get QV field
@@ -1324,6 +1548,34 @@ module CM
       return  ! bail out
 
     c_arr_ptr = get_QV(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
+        end do
+      end do
+    end do
+
+    ! -------------------- QI --------------------
+
+    ! Get QI field
+    call ESMF_StateGet(importState, itemName="QI", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    c_arr_ptr = get_QI(CMptr)
     ! Swap order of sizes from row-major to column-major
     call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
 

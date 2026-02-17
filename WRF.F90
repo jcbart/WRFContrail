@@ -176,6 +176,22 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
+    ! exportable field: TNSR
+    call NUOPC_Advertise(exportState, StandardName="TNSR", name="TNSR", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field: OLR
+    call NUOPC_Advertise(exportState, StandardName="OLR", name="OLR", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! exportable field: QV
     call NUOPC_Advertise(exportState, StandardName="QV", name="QV", &
       TransferOfferGeomObject="will provide", rc=rc)
@@ -186,6 +202,14 @@ module WRF
 
     ! importable field: deltaQV
     call NUOPC_Advertise(importState, StandardName="deltaQV", name="deltaQV", &
+      TransferOfferGeomObject="will provide", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: QI
+    call NUOPC_Advertise(exportState, StandardName="QI", name="QI", &
       TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -315,7 +339,7 @@ module WRF
       deBlockList3D(:,1,i) = patchIndicesRecv(6*(i-1)+1 : 6*(i-1)+3)
       ! max indices
       deBlockList2D(:,2,i) = (/ patchIndicesRecv(6*(i-1)+4), patchIndicesRecv(6*(i-1)+6) /)
-      deBlockList3D(:,2,i) = patchIndicesRecv(6*(i-1)+4:6*(i-1)+6)
+      deBlockList3D(:,2,i) = patchIndicesRecv(6*(i-1)+4 : 6*(i-1)+6)
     end do
 
     call ESMF_LogWrite("Creating grids with dimensions read from WRF:", ESMF_LOGMSG_INFO, rc=rc)
@@ -447,6 +471,22 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
+    ! exportable field on Grid: TNSR
+    call NUOPC_Realize(exportState, grid=grid2D, fieldName="TNSR", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field on Grid: OLR
+    call NUOPC_Realize(exportState, grid=grid2D, fieldName="OLR", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! exportable field on Grid: QV
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="QV", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
@@ -457,6 +497,14 @@ module WRF
 
     ! importable field on Grid: deltaQV
     call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaQV", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: QI
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="QI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -802,6 +850,57 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
+    ! -------------------- TNSR --------------------
+
+    ! Get TNSR field
+    call ESMF_StateGet(exportState, itemName="TNSR", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_2D(ips:ipe, jps:jpe) = head_grid%swdnt(ips:ipe, jps:jpe) &
+                                    - head_grid%swupt(ips:ipe, jps:jpe)
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -------------------- OLR --------------------
+
+    ! Get OLR field
+    call ESMF_StateGet(exportState, itemName="OLR", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_2D(ips:ipe, jps:jpe) = head_grid%olr(ips:ipe, jps:jpe)
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! -------------------- QV --------------------
 
     ! Get QV field
@@ -830,6 +929,31 @@ module WRF
     ! -------------------- deltaQV --------------------
 
     ! not initialised
+
+    ! -------------------- QI --------------------
+
+    ! Get QI field
+    call ESMF_StateGet(exportState, itemName="QI", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi)
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
     ! -------------------- deltaQI --------------------
 
@@ -860,7 +984,6 @@ module WRF
   !-----------------------------------------------------------------------------
 
   subroutine Advance(model, rc)
-!$  use omp_lib
     type(ESMF_GridComp)  :: model
     integer, intent(out) :: rc
 
@@ -1171,6 +1294,43 @@ module WRF
     ESMF_ptr_3D(ips:ipe, kps:kpe-1, jps:jpe) =  0.5d0 * (head_grid%w_2(ips:ipe, kps:kpe-1, jps:jpe) + &
                                                          head_grid%w_2(ips:ipe, kps+1:kpe, jps:jpe))
 
+    ! -------------------- TNSR --------------------
+
+    ! Get TNSR field
+    call ESMF_StateGet(exportState, itemName="TNSR", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_2D(ips:ipe, jps:jpe) = head_grid%swdnt(ips:ipe, jps:jpe) &
+                                    - head_grid%swupt(ips:ipe, jps:jpe)
+
+    ! -------------------- OLR --------------------
+
+    ! Get OLR field
+    call ESMF_StateGet(exportState, itemName="OLR", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_2D(ips:ipe, jps:jpe) = head_grid%olr(ips:ipe, jps:jpe)
+
     ! -------------------- QV --------------------
 
     ! Get QV field
@@ -1188,6 +1348,24 @@ module WRF
       return  ! bail out
 
     ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv)
+
+    ! -------------------- QI --------------------
+
+    ! Get QI field
+    call ESMF_StateGet(exportState, itemName="QI", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi)
 
     ! -----------------------------------------------
 
