@@ -4,6 +4,11 @@ module CM_interface
 
     use, intrinsic :: iso_c_binding
 
+    implicit none
+
+    ! Projection codes
+    integer, parameter :: PROJ_LC = 1
+
     type, public, bind(C) :: CMTime_F
         integer(c_int) :: yy
         integer(c_int) :: mm
@@ -40,12 +45,11 @@ module CM_interface
     ! Projection setup
 
     interface
-        subroutine init_projection(CMptr, proj_code, lat1, lon1, knowni, knownj, dx, stdlon, &
-            truelat1, truelat2) bind(C, name='init_projection_extern')
+        subroutine init_projectionlc(CMptr, lat1, lon1, knowni, knownj, dx, stdlon, &
+            truelat1, truelat2) bind(C, name='init_projectionlc_extern')
 
             import :: c_ptr, c_int, c_float
             type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: proj_code
             real(c_float), intent(in), value :: lat1
             real(c_float), intent(in), value :: lon1
             real(c_float), intent(in), value :: knowni
@@ -54,7 +58,7 @@ module CM_interface
             real(c_float), intent(in), value :: stdlon
             real(c_float), intent(in), value :: truelat1
             real(c_float), intent(in), value :: truelat2
-        end subroutine init_projection
+        end subroutine init_projectionlc
     end interface
 
 

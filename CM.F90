@@ -264,6 +264,7 @@ module CM
     type(ESMF_State)        :: importState, exportState
     type(ESMF_DistGrid)     :: distgrid2D, distgrid3D
     type(ESMF_Grid)         :: grid2D, grid3D
+    character(len=160)      :: msgString
 
     ! WRF domain info
     integer(ESMF_KIND_I4)   :: intvals(19)
@@ -352,8 +353,16 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    call init_projection(CMptr, proj_code, lat1, lon1, knowni, knownj, &
-      dx, stdlon, truelat1, truelat2)
+    if (proj_code .eq. PROJ_LC) then
+      call init_projectionlc(CMptr, lat1, lon1, knowni, knownj, dx, stdlon, truelat1, truelat2)
+    else
+      write(msgString, *) "proj_code ", proj_code, " not recognised"
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    endif
 
     distgrid2D = ESMF_DistGridCreate( &
       minIndex=(/ ids, jds /), &
