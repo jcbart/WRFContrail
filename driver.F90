@@ -349,10 +349,6 @@ module DRIVER
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-      if (petCount .gt. 1) then
-        write(msgString,*) "CM allocated ", petCount, " PETs. Max is 1."
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_ERROR, rc=rc)
-      endif
     endif
 
     ! SetServices for WRF to CM
