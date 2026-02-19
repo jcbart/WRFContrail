@@ -60,8 +60,8 @@ module CM
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_CompSpecialize(model, specLabel=label_RealizeAccepted, &
-      specRoutine=RealizeAccepted, rc=rc)
+    call NUOPC_CompSpecialize(model, specLabel=label_RealizeProvided, &
+      specRoutine=Realize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -102,17 +102,17 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field: XLAT
-    call NUOPC_Advertise(importState, StandardName="XLAT", name="XLAT", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+    ! importable field: XLONG
+    call NUOPC_Advertise(importState, StandardName="XLONG", name="XLONG", &
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field: XLONG
-    call NUOPC_Advertise(importState, StandardName="XLONG", name="XLONG", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+    ! importable field: XLAT
+    call NUOPC_Advertise(importState, StandardName="XLAT", name="XLAT", &
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -120,7 +120,7 @@ module CM
 
     ! importable field: Z
     call NUOPC_Advertise(importState, StandardName="Z", name="Z", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -128,7 +128,7 @@ module CM
 
     ! importable field: Z_AT_W
     call NUOPC_Advertise(importState, StandardName="Z_AT_W", name="Z_AT_W", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -136,7 +136,7 @@ module CM
 
     ! importable field: DRYMASS
     call NUOPC_Advertise(importState, StandardName="DRYMASS", name="DRYMASS", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -144,7 +144,7 @@ module CM
 
     ! importable field: T_POT
     call NUOPC_Advertise(importState, StandardName="T_POT", name="T_POT", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -152,7 +152,7 @@ module CM
 
     ! importable field: P
     call NUOPC_Advertise(importState, StandardName="P", name="P", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -160,7 +160,7 @@ module CM
 
     ! importable field: U
     call NUOPC_Advertise(importState, StandardName="U", name="U", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -168,7 +168,7 @@ module CM
 
     ! importable field: V
     call NUOPC_Advertise(importState, StandardName="V", name="V", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -176,7 +176,7 @@ module CM
 
     ! importable field: W
     call NUOPC_Advertise(importState, StandardName="W", name="W", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -184,7 +184,7 @@ module CM
 
     ! importable field: TNSR
     call NUOPC_Advertise(importState, StandardName="TNSR", name="TNSR", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -192,7 +192,7 @@ module CM
 
     ! importable field: OLR
     call NUOPC_Advertise(importState, StandardName="OLR", name="OLR", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -200,7 +200,7 @@ module CM
 
     ! importable field: QV
     call NUOPC_Advertise(importState, StandardName="QV", name="QV", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -208,7 +208,7 @@ module CM
 
     ! exportable field: deltaQV
     call NUOPC_Advertise(exportState, StandardName="deltaQV", name="deltaQV", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -216,7 +216,7 @@ module CM
 
     ! importable field: QI
     call NUOPC_Advertise(importState, StandardName="QI", name="QI", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -224,7 +224,7 @@ module CM
 
     ! exportable field: deltaQI
     call NUOPC_Advertise(exportState, StandardName="deltaQI", name="deltaQI", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -232,40 +232,15 @@ module CM
 
     ! exportable field: deltaNI
     call NUOPC_Advertise(exportState, StandardName="deltaNI", name="deltaNI", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: QIcontrail
-    call NUOPC_Advertise(exportState, StandardName="QIcontrail", name="QIcontrail", &
-      TransferOfferGeomObject="cannot provide", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    call ESMF_LogWrite("CM leaving Advertise", ESMF_LOGMSG_INFO, rc=rc) 
-
-  end subroutine Advertise
-
-  !-----------------------------------------------------------------------------
-
-  subroutine RealizeAccepted(model, rc)
-    type(ESMF_GridComp)  :: model
-    integer, intent(out) :: rc
-
-    ! local variables
-    type(ESMF_State)        :: importState, exportState
-    
-    rc = ESMF_SUCCESS
-
-    call ESMF_LogWrite("CM in RealizeAccepted", ESMF_LOGMSG_INFO, rc=rc)
-
-    ! query for importState and exportState
-    call NUOPC_ModelGet(model, importState=importState, &
-      exportState=exportState, rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="QIcontrail", name="QIcontrail",&
+      TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -275,133 +250,293 @@ module CM
     CMptr = create_ContrailManager()
     call ContrailManager_init(CMptr)
 
-    ! Realize importable field derived from WRF grid object: XLAT
-    call NUOPC_Realize(importState, fieldName="XLAT", rc=rc)
+    call ESMF_LogWrite("CM leaving Advertise", ESMF_LOGMSG_INFO, rc=rc) 
+
+  end subroutine Advertise
+
+  !-----------------------------------------------------------------------------
+
+  subroutine Realize(model, rc)
+    type(ESMF_GridComp)  :: model
+    integer, intent(out) :: rc
+
+    ! local variables
+    type(ESMF_State)        :: importState, exportState
+    type(ESMF_DistGrid)     :: distgrid2D, distgrid3D
+    type(ESMF_Grid)         :: grid2D, grid3D
+
+    ! WRF domain info
+    integer(ESMF_KIND_I4)   :: intvals(19)
+
+    ! Projection info
+    integer(c_int)          :: proj_code
+    real(c_float)           :: lat1, lon1, knowni, knownj, dx, stdlon, &
+                               truelat1, truelat2
+    
+    rc = ESMF_SUCCESS
+
+    call ESMF_LogWrite("CM in Realize", ESMF_LOGMSG_INFO, rc=rc)
+
+    ! query for importState and exportState
+    call NUOPC_ModelGet(model, importState=importState, &
+      exportState=exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: XLONG
-    call NUOPC_Realize(importState, fieldName="XLONG", rc=rc)
+    ! Get WRF domain info
+    call ESMF_AttributeGet(importState, 'DecompositionIntegers', intvals, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    ids = intvals(1)
+    ide = intvals(2)
+    jds = intvals(3)
+    jde = intvals(4)
+    kds = intvals(5)
+    kde = intvals(6)
+
+    ! Dimension sizes in CM (1 less than in WRF)
+    i_size = ide - ids
+    j_size = jde - jds
+    k_size = kde - kds
+
+    call init_CM_vars(CMptr, ids, ide-1, jds, jde-1, kds, kde-1)
+
+    ! Projection variables
+    call ESMF_AttributeGet(importState, 'proj_code', proj_code, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_AttributeGet(importState, 'lat1', lat1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_AttributeGet(importState, 'lon1', lon1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_AttributeGet(importState, 'knowni', knowni, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_AttributeGet(importState, 'knownj', knownj, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_AttributeGet(importState, 'dx', dx, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_AttributeGet(importState, 'stdlon', stdlon, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_AttributeGet(importState, 'truelat1', truelat1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_AttributeGet(importState, 'truelat2', truelat2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: Z
-    call NUOPC_Realize(importState, fieldName="Z", rc=rc)
+    call init_projection(CMptr, proj_code, lat1, lon1, knowni, knownj, &
+      dx, stdlon, truelat1, truelat2)
+
+    distgrid2D = ESMF_DistGridCreate( &
+      minIndex=(/ ids, jds /), &
+      maxIndex=(/ ide, jde /), &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: Z_AT_W
-    call NUOPC_Realize(importState, fieldName="Z_AT_W", rc=rc)
+    distgrid3D = ESMF_DistGridCreate( &
+      minIndex=(/ ids, kds, jds /), &
+      maxIndex=(/ ide, kde, jde /), &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: DRYMASS
-    call NUOPC_Realize(importState, fieldName="DRYMASS", rc=rc)
+    ! Create grids from distgrids; no need for coord info since we redist not regrid
+    grid2D = ESMF_GridCreate(distgrid2D, &
+      indexFlag=ESMF_INDEX_GLOBAL, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: T_POT
-    call NUOPC_Realize(importState, fieldName="T_POT", rc=rc)
+    grid3D = ESMF_GridCreate(distgrid3D, &
+      indexFlag=ESMF_INDEX_GLOBAL, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: P
-    call NUOPC_Realize(importState, fieldName="P", rc=rc)
+    ! exportable field on Grid: XLONG
+    call NUOPC_Realize(importState, grid=grid2D, fieldName="XLONG", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: U
-    call NUOPC_Realize(importState, fieldName="U", rc=rc)
+    ! exportable field on Grid: XLAT
+    call NUOPC_Realize(importState, grid=grid2D, fieldName="XLAT", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: V
-    call NUOPC_Realize(importState, fieldName="V", rc=rc)
+    ! exportable field on Grid: Z
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="Z", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: W
-    call NUOPC_Realize(importState, fieldName="W", rc=rc)
+    ! exportable field on Grid: Z_AT_W
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="Z_AT_W", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: TNSR
-    call NUOPC_Realize(importState, fieldName="TNSR", rc=rc)
+    ! exportable field on Grid: DRYMASS
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="DRYMASS", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: OLR
-    call NUOPC_Realize(importState, fieldName="OLR", rc=rc)
+    ! exportable field on Grid: T_POT
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="T_POT", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: QV
-    call NUOPC_Realize(importState, fieldName="QV", rc=rc)
+    ! exportable field on Grid: P
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="P", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize exportable field derived from WRF grid object: deltaQV
-    call NUOPC_Realize(exportState, fieldName="deltaQV", rc=rc)
+    ! exportable field on Grid: U
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="U", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize importable field derived from WRF grid object: QI
-    call NUOPC_Realize(importState, fieldName="QI", rc=rc)
+    ! exportable field on Grid: V
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="V", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize exportable field derived from WRF grid object: deltaQI
-    call NUOPC_Realize(exportState, fieldName="deltaQI", rc=rc)
+    ! exportable field on Grid: W
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="W", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize exportable field derived from WRF grid object: deltaNI
-    call NUOPC_Realize(exportState, fieldName="deltaNI", rc=rc)
+    ! exportable field on Grid: TNSR
+    call NUOPC_Realize(importState, grid=grid2D, fieldName="TNSR", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! Realize exportable field derived from WRF grid object: QIcontrail
-    call NUOPC_Realize(exportState, fieldName="QIcontrail", rc=rc)
+    ! exportable field on Grid: OLR
+    call NUOPC_Realize(importState, grid=grid2D, fieldName="OLR", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-  end subroutine RealizeAccepted
+    ! exportable field on Grid: QV
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="QV", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: deltaQV
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaQV", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: QI
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="QI", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: deltaQI
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaQI", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: deltaNI
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaNI", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field on Grid: QIcontrail
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="QIcontrail", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_LogWrite("CM leaving Realize", ESMF_LOGMSG_INFO, rc=rc)
+
+  end subroutine Realize
 
   !-----------------------------------------------------------------------------
 
@@ -420,12 +555,8 @@ module CM
     integer(c_int)              :: i, j, k
     type(c_ptr)                 :: c_arr_ptr
     real(c_float), pointer      :: f_arr_ptr_2D(:,:), f_arr_ptr_3D(:,:,:)
-    integer(c_int)              :: proj_code
-    real(c_float)               :: lat1, lon1, knowni, knownj, dx, stdlon, &
-                                   truelat1, truelat2
 
     ! Data dependency flags
-    logical, save :: vars_initialised = .false.
     logical, save :: XLONG_satisfied = .false.
     logical, save :: XLAT_satisfied = .false.
     logical, save :: Z_satisfied = .false.
@@ -440,7 +571,6 @@ module CM
     logical, save :: OLR_satisfied = .false.
     logical, save :: QV_satisfied = .false.
     logical, save :: QI_satisfied = .false.
-    logical, save :: proj_satisfied = .false.
 
     rc = ESMF_SUCCESS
 
@@ -461,67 +591,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! -------------------- Z --------------------
-    ! Do Z first to get bounds for all dimensions and init all CM vars
-
-    ! Get Z field
-    call ESMF_StateGet(importState, itemName="Z", field=field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    
-    ! Check if field has been given current time
-    isAvailable = NUOPC_IsAtTime(field, time, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    if (isAvailable) then
-      ! Get pointer from field
-      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      
-      ids = lbound(ESMF_ptr_3D, dim=1)
-      kds = lbound(ESMF_ptr_3D, dim=2)
-      jds = lbound(ESMF_ptr_3D, dim=3)
-      ide = ubound(ESMF_ptr_3D, dim=1)
-      kde = ubound(ESMF_ptr_3D, dim=2)
-      jde = ubound(ESMF_ptr_3D, dim=3)
-
-      ! Dimension sizes in CM (1 less than in WRF)
-      i_size = ide - ids
-      j_size = jde - jds
-      k_size = kde - kds
-
-      call init_CM_vars(CMptr, ids, ide-1, jds, jde-1, kds, kde-1)
-      vars_initialised = .true.
-
-      c_arr_ptr = get_Z(CMptr)
-      ! Swap order of sizes from row-major to column-major
-      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
-
-      do i = 1, i_size
-        do j = 1, j_size
-          do k = 1, k_size
-            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
-          end do
-        end do
-      end do
-
-      write(msgString, *) "Z in DataInitialize: ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
-      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-      
-      Z_satisfied = .true.
-      call ESMF_LogWrite("Z dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("Z dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    end if
-
     ! -------------------- XLONG --------------------
 
     ! Get XLONG field
@@ -538,7 +607,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -578,7 +647,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -602,6 +671,51 @@ module CM
       call ESMF_LogWrite("XLAT dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
+    ! -------------------- Z --------------------
+
+    ! Get Z field
+    call ESMF_StateGet(importState, itemName="Z", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Check if field has been given current time
+    isAvailable = NUOPC_IsAtTime(field, time, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    if (isAvailable) then
+      ! Get pointer from field
+      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      c_arr_ptr = get_Z(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            f_arr_ptr_3D(k, j, i) = ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1)
+          end do
+        end do
+      end do
+
+      write(msgString, *) "Z in DataInitialize: ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      
+      Z_satisfied = .true.
+      call ESMF_LogWrite("Z dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    else
+      call ESMF_LogWrite("Z dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
+    end if
+
     ! -------------------- Z_AT_W --------------------
 
     ! Get Z_AT_W field
@@ -618,7 +732,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -661,7 +775,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -703,7 +817,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -745,7 +859,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -787,7 +901,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -829,7 +943,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -871,7 +985,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -913,7 +1027,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -953,7 +1067,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -993,7 +1107,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1035,7 +1149,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (isAvailable .and. vars_initialised) then
+    if (isAvailable) then
       ! Get pointer from field
       call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1061,61 +1175,6 @@ module CM
       call ESMF_LogWrite("QI dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
-    ! -------------------- Projection variables --------------------
-
-    if (.not. proj_satisfied) then
-      call ESMF_AttributeGet(importState, 'proj_code', proj_code, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_AttributeGet(importState, 'lat1', lat1, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_AttributeGet(importState, 'lon1', lon1, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_AttributeGet(importState, 'knowni', knowni, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_AttributeGet(importState, 'knownj', knownj, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_AttributeGet(importState, 'dx', dx, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_AttributeGet(importState, 'stdlon', stdlon, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_AttributeGet(importState, 'truelat1', truelat1, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_AttributeGet(importState, 'truelat2', truelat2, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-
-      call init_projection(CMptr, proj_code, lat1, lon1, knowni, knownj, &
-        dx, stdlon, truelat1, truelat2)
-
-      proj_satisfied = .true.
-    end if
-
     ! -----------------------------------------------
 
     ! Check if all dependencies satisfied; if so, mark complete
@@ -1133,8 +1192,7 @@ module CM
         TNSR_satisfied .and. &
         OLR_satisfied .and. &
         QV_satisfied .and. &
-        QI_satisfied .and. &
-        proj_satisfied) then
+        QI_satisfied) then
       call NUOPC_CompAttributeSet(model, &
         name="InitializeDataComplete", value="true", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

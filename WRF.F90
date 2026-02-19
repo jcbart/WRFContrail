@@ -83,6 +83,7 @@ module WRF
 
     ! local variables
     type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock ! uninitialised, WRF does not use it in init
 
     rc = ESMF_SUCCESS
 
@@ -96,16 +97,16 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field: XLAT
-    call NUOPC_Advertise(exportState, StandardName="XLAT", name="XLAT", &
+    ! exportable field: XLONG
+    call NUOPC_Advertise(exportState, StandardName="XLONG", name="XLONG", &
       TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field: XLONG
-    call NUOPC_Advertise(exportState, StandardName="XLONG", name="XLONG", &
+    ! exportable field: XLAT
+    call NUOPC_Advertise(exportState, StandardName="XLAT", name="XLAT", &
       TransferOfferGeomObject="will provide", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -239,6 +240,18 @@ module WRF
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+
+    ! Do WRF init
+    call wrf_component_init1(model, importState, exportState, clock, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call wrf_component_init2(model, importState, exportState, clock, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
     
     call ESMF_LogWrite("WRF leaving Advertise", ESMF_LOGMSG_INFO, rc=rc) 
 
@@ -253,7 +266,6 @@ module WRF
     ! local variables
     type(ESMF_VM)           :: vm
     type(ESMF_State)        :: importState, exportState
-    type(ESMF_Clock)        :: clock ! uninitialised, WRF does not use it in init
     integer                 :: petCount
     type(ESMF_DistGrid)     :: distgrid2D, distgrid3D
     type(ESMF_Grid)         :: grid2D, grid3D
@@ -282,18 +294,6 @@ module WRF
     ! query for importState and exportState
     call NUOPC_ModelGet(model, importState=importState, &
       exportState=exportState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! Do WRF init
-    call wrf_component_init1(model, importState, exportState, clock, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call wrf_component_init2(model, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -391,16 +391,16 @@ module WRF
 
     deallocate(patchIndicesRecv, deBlockList2D, deBlockList3D)
 
-    ! exportable field on Grid: XLAT
-    call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLAT", &
+    ! exportable field on Grid: XLONG
+    call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLONG", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: XLONG
-    call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLONG", &
+    ! exportable field on Grid: XLAT
+    call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLAT", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &

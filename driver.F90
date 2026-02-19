@@ -66,8 +66,8 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_CompSpecialize(driver, specLabel=label_PostChildrenRealize, &
-      specRoutine=PostChildrenRealize, rc=rc)
+    call NUOPC_CompSpecialize(driver, specLabel=label_PostChildrenAdvertise, &
+      specRoutine=PostChildrenAdvertise, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -125,6 +125,7 @@ module DRIVER
     type(ESMF_GridComp)           :: child
     type(ESMF_CplComp)            :: connector
     integer                       :: i
+    integer                       :: petCount
     integer, allocatable          :: petList(:)
     type(ESMF_Info)               :: info
     type(ESMF_Config)             :: config
@@ -138,7 +139,7 @@ module DRIVER
 
     ! - diagnostics -
     type(ESMF_VM)                 :: vm
-    logical                       :: isFlag
+    logical                       :: isPetLocal, vmIsCreated
     character(80)                 :: msgString
     integer                       :: mpiComm
 
@@ -239,48 +240,50 @@ module DRIVER
     deallocate(petList)
 
     ! - WRF diagnostics -
-    isFlag = ESMF_GridCompIsPetLocal(child, rc=rc)
+    isPetLocal = ESMF_GridCompIsPetLocal(child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    write(msgString,*) "WRF GridCompIsPetLocal: ", isFlag
+    write(msgString,*) "WRF GridCompIsPetLocal: ", isPetLocal
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call ESMF_GridCompGet(child, vm=vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    isFlag = ESMF_VMIsCreated(vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    write(msgString,*) "WRF VmIsCreated: ", isFlag
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call ESMF_VMGet(vm, mpiCommunicator=mpiComm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    if (mpiComm==MPI_COMM_NULL) then
-      write(msgString,*) "WRF MPI_COMM_NULL"
-    else
-      write(msgString,*) "WRF valid MPI_COMM"
+    if (isPetLocal) then
+      call ESMF_GridCompGet(child, vm=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      vmIsCreated = ESMF_VMIsCreated(vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      write(msgString,*) "WRF VmIsCreated: ", vmIsCreated
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_VMGet(vm, mpiCommunicator=mpiComm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      if (mpiComm==MPI_COMM_NULL) then
+        write(msgString,*) "WRF MPI_COMM_NULL"
+      else
+        write(msgString,*) "WRF valid MPI_COMM"
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
     endif
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
 
     ! Contrail Manager
     ! - set up petList
@@ -317,48 +320,54 @@ module DRIVER
     deallocate(petList)
 
     ! - CM diagnostics -
-    isFlag = ESMF_GridCompIsPetLocal(child, rc=rc)
+    isPetLocal = ESMF_GridCompIsPetLocal(child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    write(msgString,*) "CM GridCompIsPetLocal: ", isFlag
+    write(msgString,*) "CM GridCompIsPetLocal: ", isPetLocal
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call ESMF_GridCompGet(child, vm=vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    isFlag = ESMF_VMIsCreated(vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    write(msgString,*) "CM VmIsCreated: ", isFlag
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call ESMF_VMGet(vm, mpiCommunicator=mpiComm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    if (mpiComm==MPI_COMM_NULL) then
-      write(msgString,*) "CM MPI_COMM_NULL"
-    else
-      write(msgString,*) "CM valid MPI_COMM"
+    if (isPetLocal) then
+      call ESMF_GridCompGet(child, vm=vm, petCount=petCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      vmIsCreated = ESMF_VMIsCreated(vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      write(msgString,*) "CM VmIsCreated: ", vmIsCreated
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_VMGet(vm, mpiCommunicator=mpiComm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      if (mpiComm==MPI_COMM_NULL) then
+        write(msgString,*) "CM MPI_COMM_NULL"
+      else
+        write(msgString,*) "CM valid MPI_COMM"
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      if (petCount .gt. 1) then
+        write(msgString,*) "CM allocated ", petCount, " PETs. Max is 1."
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_ERROR, rc=rc)
+      endif
     endif
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
 
     ! SetServices for WRF to CM
     call NUOPC_DriverAddComp(driver, srcCompLabel="WRF", dstCompLabel="CM", &
@@ -729,7 +738,7 @@ module DRIVER
           return  ! bail out
         ! go through all of the entries in the cplList
         do j=1, cplListSize
-            cplList(j) = trim(cplList(j))//":REMAPMETHOD=redist"
+            cplList(j) = trim(cplList(j))//":remapMethod=redist:ignoreUnmatchedIndices=true"
         enddo
         ! store the modified cplList in CplList attribute of connector i
         call NUOPC_CompAttributeSet(connectorList(i), &
@@ -748,21 +757,22 @@ module DRIVER
 
   !-----------------------------------------------------------------------------
 
-  ! This subroutine executes after WRF and CM Realize phases to pass projection info
-  subroutine PostChildrenRealize(driver, rc)
+  ! This subroutine executes after WRF and CM Advertise phases to pass domain and projection info
+  subroutine PostChildrenAdvertise(driver, rc)
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
 
     ! local variables
     type(ESMF_GridComp)           :: child
     type(ESMF_State)              :: state
+    integer(ESMF_KIND_I4)         :: intvals(19)
     integer                       :: proj_code
     real                          :: lat1, lon1, knowni, knownj, dx, stdlon, &
                                      truelat1, truelat2
 
     rc = ESMF_SUCCESS
 
-    call ESMF_LogWrite("Driver is in PostChildrenRealize()", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("Driver is in PostChildrenAdvertise()", ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -781,6 +791,14 @@ module DRIVER
         file=__FILE__)) &
         return  ! bail out
 
+    ! Get WRF domain info
+    call ESMF_AttributeGet(state, 'DecompositionIntegers', intvals, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get WRF projection info
     call ESMF_AttributeGet(state, 'proj_code', proj_code, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -840,6 +858,14 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
+    ! Domain
+    call ESMF_AttributeSet(state, 'DecompositionIntegers', intvals, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Projection
     call ESMF_AttributeSet(state, 'proj_code', proj_code, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -886,7 +912,7 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
-  end subroutine PostChildrenRealize
+  end subroutine PostChildrenAdvertise
 
   !-----------------------------------------------------------------------------
 
