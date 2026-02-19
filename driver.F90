@@ -153,7 +153,7 @@ module DRIVER
       return  ! bail out
 
     ! get the config
-    call ESMF_GridCompGet(driver, config=config, vm=vm, rc=rc)
+    call ESMF_GridCompGet(driver, petCount=petCount, config=config, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -206,16 +206,10 @@ module DRIVER
 
     ! WRF
     ! - set up petList
-    ff = NUOPC_FreeFormatCreate(config, label="WRF_petlist:", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_IngestPetList(petList, ff, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+    allocate(petList(petCount-1))
+    do i=1, petCount
+      petList(i) = i ! WRF's petList labeling goes from 1 to petCount
+    enddo
 
     ! - set /NUOPC/Hint/PePerPet/MaxCount
     call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", value=1, &
@@ -287,16 +281,8 @@ module DRIVER
 
     ! Contrail Manager
     ! - set up petList
-    ff = NUOPC_FreeFormatCreate(config, label="CM_petlist:", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_IngestPetList(petList, ff, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+    allocate(petList(1))
+    petList(1) = 0 ! Only PET0
 
     ! - set /NUOPC/Hint/PePerPet/MaxCount
     call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", value=1, &
