@@ -304,8 +304,6 @@ module CM
     j_size = jde - jds
     k_size = kde - kds
 
-    call init_CM_vars(CMptr, ids, ide-1, jds, jde-1, kds, kde-1)
-
     ! Projection variables
     call ESMF_AttributeGet(importState, 'proj_code', proj_code, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -354,7 +352,9 @@ module CM
       return  ! bail out
 
     if (proj_code .eq. PROJ_LC) then
-      call init_projectionlc(CMptr, lat1, lon1, knowni, knownj, dx, stdlon, truelat1, truelat2)
+      call init_domainlc(CMptr, ids, ide-1, jds, jde-1, kds, kde-1, &
+        lat1, lon1, knowni, knownj, dx, stdlon, truelat1, truelat2)
+
     else
       write(msgString, *) "proj_code ", proj_code, " not recognised"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_ERROR, rc=rc)
@@ -362,6 +362,7 @@ module CM
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    
     endif
 
     distgrid2D = ESMF_DistGridCreate( &

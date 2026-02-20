@@ -42,14 +42,16 @@ module CM_interface
         end subroutine ContrailManager_run
     end interface
 
-    ! Projection setup
+    ! Domain setup
 
     interface
-        subroutine init_projectionlc(CMptr, lat1, lon1, knowni, knownj, dx, stdlon, &
-            truelat1, truelat2) bind(C, name='init_projectionlc_extern')
+        subroutine init_domainlc(CMptr, ids, ide, jds, jde, kds, kde, &
+            lat1, lon1, knowni, knownj, dx, stdlon, truelat1, truelat2) &
+            bind(C, name='init_domainlc_extern')
 
             import :: c_ptr, c_int, c_float
             type(c_ptr), intent(in), value :: CMptr
+            integer(c_int), intent(in), value :: ids, ide, jds, jde, kds, kde
             real(c_float), intent(in), value :: lat1
             real(c_float), intent(in), value :: lon1
             real(c_float), intent(in), value :: knowni
@@ -58,19 +60,7 @@ module CM_interface
             real(c_float), intent(in), value :: stdlon
             real(c_float), intent(in), value :: truelat1
             real(c_float), intent(in), value :: truelat2
-        end subroutine init_projectionlc
-    end interface
-
-
-    ! Variable init
-
-    interface
-        subroutine init_CM_vars(CMptr, ids, ide, jds, jde, kds, kde) &
-            bind(C, name='init_vars_extern')
-            import :: c_ptr, c_int
-            type(c_ptr), intent(in), value :: CMptr
-            integer(c_int), intent(in), value :: ids, ide, jds, jde, kds, kde
-        end subroutine init_CM_vars
+        end subroutine init_domainlc
     end interface
 
 
