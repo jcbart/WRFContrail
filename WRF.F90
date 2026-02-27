@@ -98,144 +98,126 @@ module WRF
       return  ! bail out
 
     ! exportable field: XLONG
-    call NUOPC_Advertise(exportState, StandardName="XLONG", name="XLONG", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="XLONG", name="XLONG", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: XLAT
-    call NUOPC_Advertise(exportState, StandardName="XLAT", name="XLAT", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="XLAT", name="XLAT", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: Z
-    call NUOPC_Advertise(exportState, StandardName="Z", name="Z", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="Z", name="Z", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: Z_AT_W
-    call NUOPC_Advertise(exportState, StandardName="Z_AT_W", name="Z_AT_W", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="Z_AT_W", name="Z_AT_W", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: DRYMASS
-    call NUOPC_Advertise(exportState, StandardName="DRYMASS", name="DRYMASS", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="DRYMASS", name="DRYMASS", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: T_POT
-    call NUOPC_Advertise(exportState, StandardName="T_POT", name="T_POT", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="T_POT", name="T_POT", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: P
-    call NUOPC_Advertise(exportState, StandardName="P", name="P", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="P", name="P", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: U
-    call NUOPC_Advertise(exportState, StandardName="U", name="U", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="U", name="U", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: V
-    call NUOPC_Advertise(exportState, StandardName="V", name="V", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="V", name="V", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: W
-    call NUOPC_Advertise(exportState, StandardName="W", name="W", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="W", name="W", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: TNSR
-    call NUOPC_Advertise(exportState, StandardName="TNSR", name="TNSR", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="TNSR", name="TNSR", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: OLR
-    call NUOPC_Advertise(exportState, StandardName="OLR", name="OLR", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="OLR", name="OLR", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! exportable field: QV
-    call NUOPC_Advertise(exportState, StandardName="QV", name="QV", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="QV", name="QV", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! importable field: deltaQV
-    call NUOPC_Advertise(importState, StandardName="deltaQV", name="deltaQV", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(importState, StandardName="deltaQV", name="deltaQV", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! importable field: QI
-    call NUOPC_Advertise(exportState, StandardName="QI", name="QI", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(exportState, StandardName="QI", name="QI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! importable field: deltaQI
-    call NUOPC_Advertise(importState, StandardName="deltaQI", name="deltaQI", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(importState, StandardName="deltaQI", name="deltaQI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! importable field: deltaNI
-    call NUOPC_Advertise(importState, StandardName="deltaNI", name="deltaNI", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(importState, StandardName="deltaNI", name="deltaNI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! importable field: QIcontrail
-    call NUOPC_Advertise(importState, StandardName="QIcontrail", name="QIcontrail", &
-      TransferOfferGeomObject="will provide", rc=rc)
+    call NUOPC_Advertise(importState, StandardName="QIcontrail", name="QIcontrail", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
