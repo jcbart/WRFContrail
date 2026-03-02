@@ -770,8 +770,17 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ESMF_ptr_3D(ips:ipe-1, kps:kpe, jps:jpe) =  0.5d0 * (head_grid%u_2(ips:ipe-1, kps:kpe, jps:jpe) + &
-                                                         head_grid%u_2(ips+1:ipe, kps:kpe, jps:jpe))
+    ! U_earth = U_grid * cos(alpha) - V_grid * sin(alpha)
+    do j = jps, jpe-1
+      do k = kps, kpe
+        do i = ips, ipe-1
+          ESMF_ptr_3D(i, k, j) = (0.5d0 * (head_grid%u_2(i, k, j) + head_grid%u_2(i+1, k, j))) &
+                                 * head_grid%cosa(i, j) &
+                                 - (0.5d0 * (head_grid%v_2(i, k, j) + head_grid%v_2(i, k, j+1))) &
+                                   * head_grid%sina(i, j)
+        end do
+      end do
+    end do
 
     ! Indicate that the field has been updated
     call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
@@ -796,8 +805,17 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe-1) =  0.5d0 * (head_grid%v_2(ips:ipe, kps:kpe, jps:jpe-1) + &
-                                                         head_grid%v_2(ips:ipe, kps:kpe, jps+1:jpe))
+    ! V_earth = V_grid * cos(alpha) + U_grid * sin(alpha)
+    do j = jps, jpe-1
+      do k = kps, kpe
+        do i = ips, ipe-1
+          ESMF_ptr_3D(i, k, j) = (0.5d0 * (head_grid%v_2(i, k, j) + head_grid%v_2(i, k, j+1))) &
+                                 * head_grid%cosa(i, j) &
+                                 + (0.5d0 * (head_grid%u_2(i, k, j) + head_grid%u_2(i+1, k, j))) &
+                                   * head_grid%sina(i, j)
+        end do
+      end do
+    end do
 
     ! Indicate that the field has been updated
     call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
@@ -1235,8 +1253,17 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ESMF_ptr_3D(ips:ipe-1, kps:kpe, jps:jpe) =  0.5d0 * (head_grid%u_2(ips:ipe-1, kps:kpe, jps:jpe) + &
-                                                         head_grid%u_2(ips+1:ipe, kps:kpe, jps:jpe))
+    ! U_earth = U_grid * cos(alpha) - V_grid * sin(alpha)
+    do j = jps, jpe-1
+      do k = kps, kpe
+        do i = ips, ipe-1
+          ESMF_ptr_3D(i, k, j) = (0.5d0 * (head_grid%u_2(i, k, j) + head_grid%u_2(i+1, k, j))) &
+                                 * head_grid%cosa(i, j) &
+                                 - (0.5d0 * (head_grid%v_2(i, k, j) + head_grid%v_2(i, k, j+1))) &
+                                   * head_grid%sina(i, j)
+        end do
+      end do
+    end do
 
     ! -------------------- V --------------------
 
@@ -1254,8 +1281,17 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe-1) =  0.5d0 * (head_grid%v_2(ips:ipe, kps:kpe, jps:jpe-1) + &
-                                                         head_grid%v_2(ips:ipe, kps:kpe, jps+1:jpe))
+    ! V_earth = V_grid * cos(alpha) + U_grid * sin(alpha)
+    do j = jps, jpe-1
+      do k = kps, kpe
+        do i = ips, ipe-1
+          ESMF_ptr_3D(i, k, j) = (0.5d0 * (head_grid%v_2(i, k, j) + head_grid%v_2(i, k, j+1))) &
+                                 * head_grid%cosa(i, j) &
+                                 + (0.5d0 * (head_grid%u_2(i, k, j) + head_grid%u_2(i+1, k, j))) &
+                                   * head_grid%sina(i, j)
+        end do
+      end do
+    end do
 
     ! -------------------- W --------------------
 
