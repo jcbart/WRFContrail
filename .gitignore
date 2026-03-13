@@ -1,5 +1,1 @@
-build/*
-!build/CoupledModel.config
-wrflib.mk
-*.o
-*.mod
+build
