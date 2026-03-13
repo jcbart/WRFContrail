@@ -16,8 +16,6 @@ function(get_configure_wrf_var LINE_LIST VAR_NAME OUTPUT_VAR)
             string(REGEX REPLACE "\\\$\\(([^)]+)\\)" "\${\\1}" extracted_value "${extracted_value}")
             string(CONFIGURE "${extracted_value}" extracted_value)
             separate_arguments(extracted_value)
-            # Remove elements ending in .o
-            #list(FILTER extracted_value EXCLUDE REGEX ".*\\.o$")
             set(${OUTPUT_VAR} "${extracted_value}" PARENT_SCOPE)
             return()
         endif()
@@ -25,6 +23,7 @@ function(get_configure_wrf_var LINE_LIST VAR_NAME OUTPUT_VAR)
     message(FATAL_ERROR "Variable '${VAR_NAME}' not found in ${WRF_DIR}/configure.wrf")
 endfunction()
 
+# Read configure.wrf
 file(READ "${WRF_DIR}/configure.wrf" FILE_CONTENTS)
 # Replace any \ followed by newline with just a space
 string(REGEX REPLACE "\\\\[ \t]*\n" " " collapsed_contents "${FILE_CONTENTS}")
@@ -39,6 +38,21 @@ get_configure_wrf_var(CONFIGURE_WRF_LINE_LIST "NETCDF4_DEP_LIB" NETCDF4_DEP_LIB)
 
 set(LIB ${LIB_BUNDLED} ${LIB_EXTERNAL}  ${NETCDF4_DEP_LIB} -L${ESMFLIB} -lesmf)
 
+set(WRF_OBJECT_FILES "")
+set(WRF_LIBRARIES "")
+
+list(APPEND WRF_OBJECT_FILES "${WRF_DIR}/main/module_wrf_top.o")
+list(APPEND WRF_LIBRARIES "${WRF_DIR}/main/libwrflib.a")
+
+# Sift out object files which are mixed up in LIB so they can be added as sources
+foreach(item ${LIB})
+    if(item MATCHES "\\.o$")
+        list(APPEND WRF_OBJECT_FILES ${item})
+    else()
+        list(APPEND WRF_LIBRARIES ${item})
+    endif()
+endforeach()
+
 set(WRF_INC
     "${WRF_DIR}/dyn_em"
     "${WRF_DIR}/main"
@@ -52,20 +66,6 @@ set(WRF_INC
     "${WRF_DIR}/inc"
     "${WRF_DIR}/wrftladj"
 )
-
-set(WRF_OBJECT_FILES "")
-set(WRF_LIBRARIES "")
-
-list(APPEND WRF_OBJECT_FILES "${WRF_DIR}/main/module_wrf_top.o")
-list(APPEND WRF_LIBRARIES "${WRF_DIR}/main/libwrflib.a")
-
-foreach(item ${LIB})
-    if(item MATCHES "\\.o$")
-        list(APPEND WRF_OBJECT_FILES ${item})
-    else()
-        list(APPEND WRF_LIBRARIES ${item})
-    endif()
-endforeach()
 
 set(WRFIOFLAGS
     -fconvert=big-endian

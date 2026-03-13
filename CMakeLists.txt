@@ -28,6 +28,7 @@ if(NOT DEFINED CM_INSTALL)
 endif()
 
 set(CMAKE_PREFIX_PATH ${CM_INSTALL} ${CMAKE_PREFIX_PATH})
+# Ideally remove below
 set(contrailmanager_DIR ${CM_INSTALL}/lib64/cmake/contrailmanager/)
 
 # Function to parse esmf.mk
