@@ -64,7 +64,7 @@ get_esmf_var("ESMF_F90ESMFLINKLIBS" ESMF_F90ESMFLINKLIBS)
 set(CMAKE_Fortran_COMPILER "${ESMF_F90COMPILER}" CACHE FILEPATH "" FORCE)
 set(CMAKE_CXX_COMPILER     "${ESMF_CXXCOMPILER}" CACHE FILEPATH "" FORCE)
 
-project(WRF-Contrail-Coupler LANGUAGES C CXX Fortran)
+project(WRFContrail LANGUAGES C CXX Fortran)
 
 find_package(contrailmanager CONFIG REQUIRED)
 
@@ -74,7 +74,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/wrflib.cmake")
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 set(SOURCES
-    "${SRC_DIR}/CoupledModel.F90"
+    "${SRC_DIR}/WRFContrail.F90"
     "${SRC_DIR}/driver.F90"
     "${SRC_DIR}/WRF.F90"
     "${SRC_DIR}/wrf_ESMFMod.F90"
@@ -84,39 +84,39 @@ set(SOURCES
 
 set(RUN_DIR "${CMAKE_CURRENT_BINARY_DIR}/run")
 
-add_executable(CoupledModel ${SOURCES} ${WRF_OBJECT_FILES})
+add_executable(WRFContrail ${SOURCES} ${WRF_OBJECT_FILES})
 
-set_target_properties(CoupledModel PROPERTIES
+set_target_properties(WRFContrail PROPERTIES
     LINKER_LANGUAGE Fortran
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/run"
 )
 
-target_compile_options(CoupledModel PRIVATE
+target_compile_options(WRFContrail PRIVATE
     ${ESMF_F90COMPILEOPTS}
     ${ESMF_F90COMPILEPATHS}
     ${WRFIOFLAGS}
 )
 
-target_include_directories(CoupledModel PRIVATE
+target_include_directories(WRFContrail PRIVATE
     ${WRF_INC}
 )
 
-target_link_libraries(CoupledModel PRIVATE
+target_link_libraries(WRFContrail PRIVATE
     ${WRF_LIBRARIES}
     ${ESMF_F90ESMFLINKLIBS}
     contrailmanager::contrailmanager
 )
 
-target_link_options(CoupledModel PRIVATE
+target_link_options(WRFContrail PRIVATE
     ${ESMF_F90LINKOPTS}
     ${ESMF_F90LINKPATHS}
     ${ESMF_F90LINKRPATHS}
 )
 
 # Copy default input files if they do not already exist in build directory
-set(WRF_CONTRAIL_COUPLER_INPUT_FILES "CoupledModel.config")
+set(WRFCONTRAIL_INPUT_FILES "WRFContrail.config")
 
-foreach(FILE_NAME ${WRF_CONTRAIL_COUPLER_INPUT_FILES})
+foreach(FILE_NAME ${WRFCONTRAIL_INPUT_FILES})
     if(NOT EXISTS "${CMAKE_BINARY_DIR}/run/${FILE_NAME}")
         configure_file(
             "${CMAKE_CURRENT_SOURCE_DIR}/inputs/${FILE_NAME}.default"

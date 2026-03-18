@@ -8,7 +8,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !==============================================================================
 
-program CoupledModel
+program WRFContrail
 
   !-----------------------------------------------------------------------------
   ! Generic ESM application driver
@@ -29,7 +29,7 @@ program CoupledModel
   logical                 :: VMLog_logical
 
   ! Initialize ESMF
-  call ESMF_Initialize(configFileName="./CoupledModel.config", &
+  call ESMF_Initialize(configFileName="./WRFContrail.config", &
                        defaultGlobalResourceControl=.true., &
                        defaultCalKind=ESMF_CALKIND_GREGORIAN, &
                        config=config, &
@@ -39,7 +39,7 @@ program CoupledModel
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_LogWrite("CoupledModel STARTING", ESMF_LOGMSG_INFO, rc=rc)
+  call ESMF_LogWrite("WRFContrail STARTING", ESMF_LOGMSG_INFO, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
@@ -63,13 +63,13 @@ program CoupledModel
   read(VMLog_char, *) VMLog_logical
 
   if (VMLog_logical) then
-    call ESMF_LogWrite("CoupledModel will log VM", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("WRFContrail will log VM", ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
   else
-    call ESMF_LogWrite("CoupledModel will not log VM", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("WRFContrail will not log VM", ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -77,7 +77,7 @@ program CoupledModel
   end if
 
   if (VMLog_logical) then
-    call ESMF_VMLog(vm, prefix="CoupledModel VM init: ", logMsgFlag=ESMF_LOGMSG_INFO, &
+    call ESMF_VMLog(vm, prefix="WRFContrail VM init: ", logMsgFlag=ESMF_LOGMSG_INFO, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -115,7 +115,7 @@ program CoupledModel
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   if (VMLog_logical) then
-    call ESMF_VMLog(vm, prefix="CoupledModel VM: ", logMsgFlag=ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_VMLog(vm, prefix="WRFContrail VM: ", logMsgFlag=ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -152,7 +152,7 @@ program CoupledModel
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   if (VMLog_logical) then
-    call ESMF_VMLog(vm, prefix="CoupledModel VM final: ", logMsgFlag=ESMF_LOGMSG_INFO, &
+    call ESMF_VMLog(vm, prefix="WRFContrail VM final: ", logMsgFlag=ESMF_LOGMSG_INFO, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -160,7 +160,7 @@ program CoupledModel
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
   end if
 
-  call ESMF_LogWrite("CoupledModel FINISHED", ESMF_LOGMSG_INFO, rc=rc)
+  call ESMF_LogWrite("WRFContrail FINISHED", ESMF_LOGMSG_INFO, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
@@ -169,7 +169,7 @@ program CoupledModel
   ! Finalize ESMF
   call ESMF_Finalize()
 
-end program CoupledModel
+end program WRFContrail
 
 
 subroutine FieldDictionaryAddEntries()
