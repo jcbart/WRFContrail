@@ -11,7 +11,7 @@
 See each for their requirements.
 
 Additionally:
-- C++ compiler supporting C++20
+- Fortran and C++ compiler supporting C++20
 - CMake
 - Git
 
