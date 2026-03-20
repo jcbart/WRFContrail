@@ -34,7 +34,7 @@ module CM
   integer(c_int), save :: ids = 0, ide = 0, jds = 0, jde = 0, kds = 0, kde = 0
   integer(c_int), save :: i_size = 0, j_size = 0, k_size = 0
 
-  public SetServices
+  public SetVM, SetServices
 
   !-----------------------------------------------------------------------------
   contains

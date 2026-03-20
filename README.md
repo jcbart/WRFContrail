@@ -20,7 +20,7 @@ Additionally:
 With ESMF installed on your system, there are three steps to creating the coupled model:
 
 1. [Compile WRF](#compiling-wrf)
-2. [Installing ContrailManager](#installing-contrailmanager)
+2. [Install ContrailManager](#install-contrailmanager)
 3. [Compile WRFContrail](#compiling-wrfcontrail)
 
 ### Compiling WRF
@@ -51,7 +51,7 @@ Most of these changes are the same as for the [SKRIPS](https://skrips.readthedoc
 Compile WRF with `./compile`. **WRFContrail** uses the libraries produced by compiling WRF to integrate WRF into the coupled model.
 
 
-### Installing ContrailManager
+### Install ContrailManager
 
 See the [ContrailManager GitHub repo](https://github.com/jcbart/ContrailManager).
 
@@ -82,11 +82,22 @@ to compile. This will produce the executable `WRFContrail` in a directory named 
 
 If you have not run previously, copy or link the contents of `WRF/run` (except the executables) to `run`. Ensure that CMake has automatically copied the Contrail Manager's input files.
 
-Use WPS and `real.exe` to prepare input and boundary data for WRF. Link `wrfbdy*` and `wrfinput*` files to `build`.
+Use WPS and `real.exe` to prepare input and boundary data for WRF. Link `wrfbdy*` and `wrfinput*` files to `run`.
 
-Set runtime configuration variables for the coupled model in `WRFContrail.config`.
+Set runtime configuration variables for the coupled model in `WRFContrail.config`. The line "Contrail Manager threads" sets the number of OpenMP threads to use for the Contrail Manager.
 
-Run the coupled model with `mpirun -np X ./WRFContrail`, specifying the number of MPI ranks to use with `X`. WRFContrail will assign the 0th MPI rank to the Contrail Manager and the remainder to WRF.
+Run the coupled model from the `run` directory with
+```bash
+mpirun -np N ./WRFContrail
+```
+specifying a number of CPU cores to use with `N`.
+
+> [!NOTE]
+> **How WRFContrail assigns CPU cores**
+>
+> TL;DR: If the number of Contrail Manager threads is $N_{\text{CM}}$ and the total number of CPU cores is $N$, WRFContrail will give the first $N_{\text{CM}}$ cores to the Contrail Manager as OpenMP threads and the remaining $N - N_{\text{CM}}$ to WRF as MPI ranks. Ensure $N > N_{\text{CM}}$ and follow WRF's best practices for number of MPI ranks to use.
+>
+> In more detail, ESMF will initialise MPI with $N$ processes, what ESMF refers to as Persistent Execution Threads (PETs). Each PET is initially associated with one Processing Element (PE), i.e. CPU core. The 0th PET becomes the Contrail Manager's PET. The following PETs up to and including $N_{\text{CM}} - 1$ each give up their PE to PET 0 which is now associated with $N_{\text{CM}}$ PEs. WRF owns PETs $N_{\text{CM}}$ through $N - 1$ which each have one PE as per typical WRF distributed memory operation.
 
 ## Acknowledgements
 

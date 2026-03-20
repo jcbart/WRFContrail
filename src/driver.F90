@@ -20,8 +20,12 @@ module DRIVER
   use NUOPC_Driver, &
     driverSS             => SetServices
 
-  use WRF, only: wrfSS => SetServices
-  use CM, only: cmSS => SetServices
+  use WRF, only: &
+    wrfSS => SetServices, &
+    wrfSVM => SetVM
+  use CM, only: &
+    cmSS => SetServices, &
+    cmSVM => SetVM
 
   use NUOPC_Connector, only: cplSS => SetServices
 
@@ -125,7 +129,7 @@ module DRIVER
     type(ESMF_GridComp)           :: child
     type(ESMF_CplComp)            :: connector
     integer                       :: i
-    integer                       :: petCount
+    integer                       :: petCount, peCount, localPet
     integer, allocatable          :: petList(:)
     type(ESMF_Info)               :: info
     type(ESMF_Config)             :: config
@@ -134,8 +138,8 @@ module DRIVER
     logical                       :: VMLog_logical
     character(len=800)            :: WRF_verbosity
     character(len=800)            :: CM_verbosity
-    character(len=800)            :: cplFreq_s_char
-    integer                       :: cplFreq_s
+    character(len=800)            :: cplFreq_s_char, CM_threads_char
+    integer                       :: cplFreq_s, CM_threads
 
     ! - diagnostics -
     type(ESMF_VM)                 :: vm
@@ -152,7 +156,7 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
-    ! get the config
+    ! Get the config
     call ESMF_GridCompGet(driver, petCount=petCount, config=config, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -204,23 +208,37 @@ module DRIVER
       file=__FILE__)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+    ! Get Contrail Manager threads from config
+    ff = NUOPC_FreeFormatCreate(config, label="Contrail Manager threads:", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_FreeFormatGetLine(ff, 1, lineString=CM_threads_char)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+    read(CM_threads_char, *) CM_threads
+
     ! WRF
     ! - set up petList
-    allocate(petList(petCount-1))
-    do i=1, petCount
-      petList(i) = i ! WRF's petList labeling goes from 1 to petCount
+    ! WRF's petList labeling goes from CM_threads to petCount-1
+    allocate(petList(petCount - CM_threads))
+    do i=1, petCount - CM_threads
+      petList(i) = CM_threads - 1 + i
     enddo
 
     ! - set /NUOPC/Hint/PePerPet/MaxCount
-    call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", value=1, &
-      rc=rc)
+    call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", value=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
     
     ! - add the WRF component to Driver
-    call NUOPC_DriverAddComp(driver, "WRF", wrfSS, info=info, &
+    call NUOPC_DriverAddComp(driver, "WRF", wrfSS, wrfSVM, info=info, &
       petList=petList, comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -245,6 +263,7 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    ! If PET is a WRF PET
     if (isPetLocal) then
       call ESMF_GridCompGet(child, vm=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -262,7 +281,13 @@ module DRIVER
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-      call ESMF_VMGet(vm, mpiCommunicator=mpiComm, rc=rc)
+      call ESMF_VMGet(vm, petCount=petCount, peCount=peCount, mpiCommunicator=mpiComm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      write(msgString,*) "WRF PETs: ", petCount, ", PEs: ", peCount
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -281,18 +306,20 @@ module DRIVER
 
     ! Contrail Manager
     ! - set up petList
-    allocate(petList(1))
-    petList(1) = 0 ! Only PET0
+    allocate(petList(CM_threads))
+    ! CM's PETs go from 0 to CM_threads - 1
+    do i=1, CM_threads
+      petList(i) = i - 1
+    enddo
 
     ! - set /NUOPC/Hint/PePerPet/MaxCount
-    call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", value=1, &
-      rc=rc)
+    call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", value=CM_threads, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
     ! - add the Contrail Manager component to Driver
-    call NUOPC_DriverAddComp(driver, "CM", cmSS, info=info, &
+    call NUOPC_DriverAddComp(driver, "CM", cmSS, cmSVM, info=info, &
       petList=petList, comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -304,6 +331,17 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
     deallocate(petList)
+
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
     ! - CM diagnostics -
     isPetLocal = ESMF_GridCompIsPetLocal(child, rc=rc)
@@ -317,8 +355,10 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    if (isPetLocal) then
-      call ESMF_GridCompGet(child, vm=vm, petCount=petCount, rc=rc)
+    ! If PET is 0 (PETs which have given their PEs to CM are still local, but fail on VMGet
+    ! line if allowed to proceed)
+    if (localPet == 0) then
+      call ESMF_GridCompGet(child, vm=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -334,7 +374,13 @@ module DRIVER
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-      call ESMF_VMGet(vm, mpiCommunicator=mpiComm, rc=rc)
+      call ESMF_VMGet(vm, petCount=petCount, peCount=peCount, mpiCommunicator=mpiComm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      write(msgString,*) "CM PETs: ", petCount, ", PEs: ", peCount
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &

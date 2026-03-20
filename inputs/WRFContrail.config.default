@@ -5,6 +5,8 @@ VMLog:                  .false.
 
 Coupling frequency (s): 120
 
+Contrail Manager threads: 1
+
 ! off, low, high, max
 driver_verbosity:       low
 WRF_verbosity:          low
