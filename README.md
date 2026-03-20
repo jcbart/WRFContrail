@@ -95,9 +95,11 @@ specifying a number of CPU cores to use with `N`.
 > [!NOTE]
 > **How WRFContrail assigns CPU cores**
 >
-> TL;DR: If the number of Contrail Manager threads is $N_{\text{CM}}$ and the total number of CPU cores is $N$, WRFContrail will give the first $N_{\text{CM}}$ cores to the Contrail Manager as OpenMP threads and the remaining $N - N_{\text{CM}}$ to WRF as MPI ranks. Ensure $N > N_{\text{CM}}$ and follow WRF's best practices for number of MPI ranks to use.
+> Summary:
+> - If the number of Contrail Manager threads is $N_{\text{CM}}$ and the total number of CPU cores is $N$, WRFContrail will give the first $N_{\text{CM}}$ cores to the Contrail Manager as OpenMP threads and the remaining $N - N_{\text{CM}}$ to WRF as MPI ranks.
+> - Ensure $N > N_{\text{CM}}$ and follow WRF's best practices for number of MPI ranks to use.
 >
-> In more detail, ESMF will initialise MPI with $N$ processes, what ESMF refers to as Persistent Execution Threads (PETs). Each PET is initially associated with one Processing Element (PE), i.e. CPU core. The 0th PET becomes the Contrail Manager's PET. The following PETs up to and including $N_{\text{CM}} - 1$ each give up their PE to PET 0 which is now associated with $N_{\text{CM}}$ PEs. WRF owns PETs $N_{\text{CM}}$ through $N - 1$ which each have one PE as per typical WRF distributed memory operation.
+> ESMF will initialise MPI with $N$ processes, what ESMF refers to as Persistent Execution Threads (PETs). Each PET is initially associated with one Processing Element (PE), i.e. CPU core. The 0th PET becomes the Contrail Manager's PET. The following PETs up to and including $N_{\text{CM}} - 1$ each give up their PE to PET 0 which is now associated with $N_{\text{CM}}$ PEs. WRF owns PETs $N_{\text{CM}}$ through $N - 1$ which each have one PE as per typical WRF distributed memory operation.
 
 ## Acknowledgements
 
