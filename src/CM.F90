@@ -698,9 +698,6 @@ module CM
           end do
         end do
       end do
-
-      write(msgString, *) "Z in DataInitialize: ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
-      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       
       Z_satisfied = .true.
       call ESMF_LogWrite("Z dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
@@ -1317,9 +1314,6 @@ module CM
       end do
     end do
 
-    write(msgString, *) "Z: ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-
     ! -------------------- Z_AT_W --------------------
 
     ! Get Z_AT_W field
@@ -1349,9 +1343,6 @@ module CM
       end do
     end do
 
-    write(msgString, *) "Z_AT_W: ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-
     ! -------------------- DRYMASS --------------------
 
     ! Get DRYMASS field
@@ -1379,9 +1370,6 @@ module CM
         end do
       end do
     end do
-
-    write(msgString, *) "DRYMASS: ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
 
     ! -------------------- T_POT --------------------
 
@@ -1411,9 +1399,6 @@ module CM
       end do
     end do
 
-    write(msgString, *) "T_POT: ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-
     ! -------------------- P --------------------
 
     ! Get P field
@@ -1441,9 +1426,6 @@ module CM
         end do
       end do
     end do
-
-    write(msgString, *) "P: ESMF_ptr_3D(i=100, k=10, j=200) = ", ESMF_ptr_3D(100, 10, 200)
-    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
 
     ! -------------------- U --------------------
 

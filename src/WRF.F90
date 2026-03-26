@@ -1066,8 +1066,10 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) = &
-      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+    head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) = max( &
+      0., &
+      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) &
+    )
 
     ! -------------------- deltaQI --------------------
 
@@ -1085,8 +1087,10 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) = &
-      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+    head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) = max( &
+      0., &
+      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) &
+    )
 
     ! -------------------- deltaNI --------------------
 
@@ -1104,8 +1108,10 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) = &
-      head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+    head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) = max( &
+      0., &
+      head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) &
+    )
 
     ! -------------------- QIcontrail --------------------
 
