@@ -138,8 +138,8 @@ module DRIVER
     logical                       :: VMLog_logical
     character(len=800)            :: WRF_verbosity
     character(len=800)            :: CM_verbosity
-    character(len=800)            :: cplFreq_s_char, CM_threads_char
-    integer                       :: cplFreq_s, CM_threads
+    character(len=800)            :: cplInterval_s_char, CM_threads_char
+    integer                       :: cplInterval_s, CM_threads
 
     ! - diagnostics -
     type(ESMF_VM)                 :: vm
@@ -419,27 +419,27 @@ module DRIVER
       file=__FILE__)) &
       return  ! bail out
 
-    ! Get coupling frequency from config
-    ff = NUOPC_FreeFormatCreate(config, label="Coupling frequency (s):", rc=rc)
+    ! Get coupling interval from config
+    ff = NUOPC_FreeFormatCreate(config, label="Coupling interval (s):", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_FreeFormatGetLine(ff, 1, lineString=cplFreq_s_char)
+    call NUOPC_FreeFormatGetLine(ff, 1, lineString=cplInterval_s_char)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
-    read(cplFreq_s_char, *) cplFreq_s
+    read(cplInterval_s_char, *) cplInterval_s
     ! set the driver clock
-    call ESMF_TimeIntervalSet(timeStep, s=cplFreq_s, rc=rc)
+    call ESMF_TimeIntervalSet(timeStep, s=cplInterval_s, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
     
-    msgString = "Coupling frequency: " // trim(cplFreq_s_char) // " s."
+    msgString = "Coupling interval: " // trim(cplInterval_s_char) // " s."
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &

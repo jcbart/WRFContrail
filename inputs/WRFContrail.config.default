@@ -3,7 +3,7 @@ logKindFlag:            ESMF_LOGKIND_MULTI        ! ESMF_LOGKIND_MULTI, ESMF_LOG
 logAppendFlag:          .false.
 VMLog:                  .false.
 
-Coupling frequency (s): 120
+Coupling interval (s): 600
 
 Contrail Manager threads: 1
 
