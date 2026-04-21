@@ -223,6 +223,13 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
+    ! importable field: REIcontrail
+    call NUOPC_Advertise(importState, StandardName="REIcontrail", name="REIcontrail", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! Do WRF init
     call wrf_component_init1(model, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -373,7 +380,6 @@ module WRF
 
     deallocate(patchIndicesRecv, deBlockList2D, deBlockList3D)
 
-    ! exportable field on Grid: XLONG
     call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLONG", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -381,7 +387,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: XLAT
     call NUOPC_Realize(exportState, grid=grid2D, fieldName="XLAT", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -389,7 +394,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: Z
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="Z", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -397,7 +401,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: Z_AT_W
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="Z_AT_W", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -405,7 +408,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: DRYMASS
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="DRYMASS", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -413,7 +415,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: T_POT
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="T_POT", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -421,7 +422,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: P
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="P", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -429,7 +429,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: U
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="U", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -437,7 +436,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: V
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="V", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -445,7 +443,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: W
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="W", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -453,7 +450,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: TNSR
     call NUOPC_Realize(exportState, grid=grid2D, fieldName="TNSR", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -461,7 +457,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: OLR
     call NUOPC_Realize(exportState, grid=grid2D, fieldName="OLR", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -469,7 +464,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: QV
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="QV", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -477,7 +471,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: deltaQV
     call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaQV", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -485,7 +478,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: QI
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="QI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -493,7 +485,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: deltaQI
     call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaQI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -501,7 +492,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: deltaNI
     call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaNI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -509,8 +499,14 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: QIcontrail
     call NUOPC_Realize(importState, grid=grid3D, fieldName="QIcontrail", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="REIcontrail", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -967,6 +963,10 @@ module WRF
 
     ! not initialised
 
+    ! -------------------- REIcontrail --------------------
+
+    ! not initialised
+
     ! -----------------------------------------------
     
     ! Indicate that the model has everything it needs
@@ -1130,6 +1130,24 @@ module WRF
       return  ! bail out
 
     head_grid%qicontrail(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
+    ! -------------------- REIcontrail --------------------
+
+    ! Get REIcontrail field
+    call ESMF_StateGet(importState, itemName="REIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    head_grid%reicontrail(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
     ! -----------------------------------------------
     

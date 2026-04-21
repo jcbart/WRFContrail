@@ -228,6 +228,13 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
+    ! exportable field: REIcontrail
+    call NUOPC_Advertise(exportState, StandardName="REIcontrail", name="REIcontrail",rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! Initialise Contrail Manager
     CMptr = create_ContrailManager()
     call ContrailManager_init(CMptr)
@@ -382,7 +389,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: XLONG
     call NUOPC_Realize(importState, grid=grid2D, fieldName="XLONG", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -390,7 +396,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: XLAT
     call NUOPC_Realize(importState, grid=grid2D, fieldName="XLAT", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -398,7 +403,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: Z
     call NUOPC_Realize(importState, grid=grid3D, fieldName="Z", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -406,7 +410,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: Z_AT_W
     call NUOPC_Realize(importState, grid=grid3D, fieldName="Z_AT_W", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -414,7 +417,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: DRYMASS
     call NUOPC_Realize(importState, grid=grid3D, fieldName="DRYMASS", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -422,7 +424,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: T_POT
     call NUOPC_Realize(importState, grid=grid3D, fieldName="T_POT", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -430,7 +431,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: P
     call NUOPC_Realize(importState, grid=grid3D, fieldName="P", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -438,7 +438,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: U
     call NUOPC_Realize(importState, grid=grid3D, fieldName="U", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -446,7 +445,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: V
     call NUOPC_Realize(importState, grid=grid3D, fieldName="V", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -454,7 +452,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: W
     call NUOPC_Realize(importState, grid=grid3D, fieldName="W", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -462,7 +459,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: TNSR
     call NUOPC_Realize(importState, grid=grid2D, fieldName="TNSR", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -470,7 +466,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: OLR
     call NUOPC_Realize(importState, grid=grid2D, fieldName="OLR", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -478,7 +473,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field on Grid: QV
     call NUOPC_Realize(importState, grid=grid3D, fieldName="QV", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -486,7 +480,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: deltaQV
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaQV", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -494,7 +487,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: QI
     call NUOPC_Realize(importState, grid=grid3D, fieldName="QI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -502,7 +494,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: deltaQI
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaQI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -510,7 +501,6 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: deltaNI
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaNI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -518,8 +508,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field on Grid: QIcontrail
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="QIcontrail", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="REIcontrail", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -619,8 +615,6 @@ module CM
       
       XLONG_satisfied = .true.
       call ESMF_LogWrite("XLONG dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("XLONG dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- XLAT --------------------
@@ -659,8 +653,6 @@ module CM
       
       XLAT_satisfied = .true.
       call ESMF_LogWrite("XLAT dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("XLAT dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- Z --------------------
@@ -701,8 +693,6 @@ module CM
       
       Z_satisfied = .true.
       call ESMF_LogWrite("Z dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("Z dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- Z_AT_W --------------------
@@ -744,8 +734,6 @@ module CM
       
       Z_AT_W_satisfied = .true.
       call ESMF_LogWrite("Z_AT_W dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("Z_AT_W dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- DRYMASS --------------------
@@ -786,8 +774,6 @@ module CM
       
       DRYMASS_satisfied = .true.
       call ESMF_LogWrite("DRYMASS dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("DRYMASS dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- T_POT --------------------
@@ -828,8 +814,6 @@ module CM
       
       T_POT_satisfied = .true.
       call ESMF_LogWrite("T_POT dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("T_POT dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- P --------------------
@@ -870,8 +854,6 @@ module CM
       
       P_satisfied = .true.
       call ESMF_LogWrite("P dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("P dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- U --------------------
@@ -912,8 +894,6 @@ module CM
       
       U_satisfied = .true.
       call ESMF_LogWrite("U dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("U dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- V --------------------
@@ -954,8 +934,6 @@ module CM
       
       V_satisfied = .true.
       call ESMF_LogWrite("V dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("V dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- W --------------------
@@ -996,8 +974,6 @@ module CM
       
       W_satisfied = .true.
       call ESMF_LogWrite("W dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("W dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- TNSR --------------------
@@ -1036,8 +1012,6 @@ module CM
       
       TNSR_satisfied = .true.
       call ESMF_LogWrite("TNSR dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("TNSR dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- OLR --------------------
@@ -1076,8 +1050,6 @@ module CM
       
       OLR_satisfied = .true.
       call ESMF_LogWrite("OLR dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("OLR dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- QV --------------------
@@ -1118,8 +1090,6 @@ module CM
       
       QV_satisfied = .true.
       call ESMF_LogWrite("QV dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("QV dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -------------------- QI --------------------
@@ -1160,8 +1130,6 @@ module CM
       
       QI_satisfied = .true.
       call ESMF_LogWrite("QI dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
-    else
-      call ESMF_LogWrite("QI dependency not yet satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
     ! -----------------------------------------------
@@ -1729,6 +1697,34 @@ module CM
       return  ! bail out
 
     c_arr_ptr = get_QIcontrail(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
+        end do
+      end do
+    end do
+
+    ! -------------------- REIcontrail --------------------
+
+    ! Get REIcontrail field
+    call ESMF_StateGet(exportState, itemName="REIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    c_arr_ptr = get_REIcontrail(CMptr)
     ! Swap order of sizes from row-major to column-major
     call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
 

@@ -210,4 +210,12 @@ module CM_interface
         end function get_QIcontrail
     end interface
 
+    interface
+        function get_REIcontrail(CMptr) bind(C, name='get_REIcontrail_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_REIcontrail
+        end function get_REIcontrail
+    end interface
+
 end module CM_interface
