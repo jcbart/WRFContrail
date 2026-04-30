@@ -239,7 +239,7 @@ module DRIVER
     
     ! - add the WRF component to Driver
     call NUOPC_DriverAddComp(driver, "WRF", wrfSS, wrfSVM, info=info, &
-      petList=petList, comp=child, rc=rc)
+      config=config, petList=petList, comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -320,7 +320,7 @@ module DRIVER
       return  ! bail out
     ! - add the Contrail Manager component to Driver
     call NUOPC_DriverAddComp(driver, "CM", cmSS, cmSVM, info=info, &
-      petList=petList, comp=child, rc=rc)
+      config=config, petList=petList, comp=child, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -535,15 +535,6 @@ module DRIVER
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-
-    ! While we have these values, set Contrail Manager's internal current time
-    !CMstartTime%yy = year
-    !CMstartTime%mm = month
-    !CMstartTime%dd = day
-    !CMstartTime%h = hour
-    !CMstartTime%m = minute
-    !CMstartTime%s = second
-    !call ContrailManager_setStartTime(CMptr, CMstartTime)
 
     ! Get stop time from WRF export state
     call ESMF_AttributeGet(WRFexportState, "ComponentStopTime", timevals, rc=rc)

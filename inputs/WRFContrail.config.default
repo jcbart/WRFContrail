@@ -3,9 +3,11 @@ logKindFlag:            ESMF_LOGKIND_MULTI        ! ESMF_LOGKIND_MULTI, ESMF_LOG
 logAppendFlag:          .false.
 VMLog:                  .false.
 
+Contrail Manager threads: 1
+
 Coupling interval (s): 600
 
-Contrail Manager threads: 1
+Effective radius coupling: .true.
 
 ! off, low, high, max
 driver_verbosity:       low
