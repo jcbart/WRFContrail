@@ -139,6 +139,13 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
+    ! importable field: deltaT_POT
+    call NUOPC_Advertise(importState, StandardName="deltaT_POT", name="deltaT_POT", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! exportable field: P
     call NUOPC_Advertise(exportState, StandardName="P", name="P", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -422,6 +429,13 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaT_POT", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="P", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -685,6 +699,7 @@ module WRF
     do j = jps, jpe
       do k = kps, kpe
         do i = ips, ipe
+          ! Dry air mass (kg) = 1 / g * area (m2) * dry air weight per unit area (Pa)
           ESMF_ptr_3D(i, k, j) = 1.d0 / 9.807d0 * head_grid%area2d(i, j) &
                                  * (head_grid%mu_2(i, j) + head_grid%mub(i, j)) &
                                  * (-head_grid%dnw(k))
@@ -715,7 +730,7 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = (300. + head_grid%th_phy_m_t0(ips:ipe, kps:kpe, jps:jpe))
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = (300. + head_grid%t_2(ips:ipe, kps:kpe, jps:jpe))
 
     ! Indicate that the field has been updated
     call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
@@ -922,10 +937,6 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! -------------------- deltaQV --------------------
-
-    ! not initialised
-
     ! -------------------- QI --------------------
 
     ! Get QI field
@@ -950,22 +961,6 @@ module WRF
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-
-    ! -------------------- deltaQI --------------------
-
-    ! not initialised
-
-    ! -------------------- deltaNI --------------------
-
-    ! not initialised
-
-    ! -------------------- QIcontrail --------------------
-
-    ! not initialised
-
-    ! -------------------- REIcontrail --------------------
-
-    ! not initialised
 
     ! -----------------------------------------------
     
@@ -1050,6 +1045,26 @@ module WRF
 
     ! Imports
 
+    ! -------------------- deltaT_POT --------------------
+
+    ! Get deltaT_POT field
+    call ESMF_StateGet(importState, itemName="deltaT_POT", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Since it is a delta, we don't care about t0
+    head_grid%t_2(ips:ipe, kps:kpe, jps:jpe) = &
+      head_grid%t_2(ips:ipe, kps:kpe, jps:jpe) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
     ! -------------------- deltaQV --------------------
 
     ! Get deltaQV field
@@ -1067,8 +1082,8 @@ module WRF
       return  ! bail out
 
     head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) = max( &
-      0., &
-      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) &
+      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe), &
+      1.E-10 &
     )
 
     ! -------------------- deltaQI --------------------
@@ -1088,8 +1103,8 @@ module WRF
       return  ! bail out
 
     head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) = max( &
-      0., &
-      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) &
+      head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qi) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe), &
+      0. &
     )
 
     ! -------------------- deltaNI --------------------
@@ -1109,8 +1124,8 @@ module WRF
       return  ! bail out
 
     head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) = max( &
-      0., &
-      head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) &
+      head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe), &
+      0. &
     )
 
     ! -------------------- QIcontrail --------------------
@@ -1217,6 +1232,7 @@ module WRF
     do j = jps, jpe
       do k = kps, kpe
         do i = ips, ipe
+          ! Dry air mass (kg) = 1 / g * area (m2) * dry air weight per unit area (Pa)
           ESMF_ptr_3D(i, k, j) = 1.d0 / 9.807d0 * head_grid%area2d(i, j) &
                                  * (head_grid%mu_2(i, j) + head_grid%mub(i, j)) &
                                  * (-head_grid%dnw(k))
@@ -1240,7 +1256,7 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = (300. + head_grid%th_phy_m_t0(ips:ipe, kps:kpe, jps:jpe))
+    ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe) = (300. + head_grid%t_2(ips:ipe, kps:kpe, jps:jpe))
 
     ! -------------------- P --------------------
 

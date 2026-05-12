@@ -115,6 +115,14 @@ module CM_interface
     end interface
 
     interface
+        function get_deltaT_POT(CMptr) bind(C, name='get_deltaT_POT_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_deltaT_POT
+        end function get_deltaT_POT
+    end interface
+
+    interface
         function get_P(CMptr) bind(C, name='get_P_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr

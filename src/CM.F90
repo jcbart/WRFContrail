@@ -182,6 +182,13 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
+    ! exportable field: deltaT_POT
+    call NUOPC_Advertise(exportState, StandardName="deltaT_POT", name="deltaT_POT", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! importable field: P
     call NUOPC_Advertise(importState, StandardName="P", name="P", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -463,6 +470,13 @@ module CM
       return  ! bail out
 
     call NUOPC_Realize(importState, grid=grid3D, fieldName="T_POT", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaT_POT", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -854,6 +868,28 @@ module CM
       call ESMF_LogWrite("T_POT dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
+    ! -------------------- deltaT_POT --------------------
+
+    ! Get deltaT_POT field
+    call ESMF_StateGet(exportState, itemName="deltaT_POT", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_FieldFill(field, dataFillScheme="const", const1=0.D0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! -------------------- P --------------------
 
     ! Get P field
@@ -1130,6 +1166,28 @@ module CM
       call ESMF_LogWrite("QV dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
+    ! -------------------- deltaQV --------------------
+
+    ! Get deltaQV field
+    call ESMF_StateGet(exportState, itemName="deltaQV", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_FieldFill(field, dataFillScheme="const", const1=0.D0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! -------------------- QI --------------------
 
     ! Get QI field
@@ -1169,6 +1227,94 @@ module CM
       QI_satisfied = .true.
       call ESMF_LogWrite("QI dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
+
+    ! -------------------- deltaQI --------------------
+
+    ! Get deltaQI field
+    call ESMF_StateGet(exportState, itemName="deltaQI", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_FieldFill(field, dataFillScheme="const", const1=0.D0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -------------------- deltaNI --------------------
+
+    ! Get deltaNI field
+    call ESMF_StateGet(exportState, itemName="deltaNI", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_FieldFill(field, dataFillScheme="const", const1=0.D0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -------------------- QIcontrail --------------------
+
+    ! Get QIcontrail field
+    call ESMF_StateGet(exportState, itemName="QIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_FieldFill(field, dataFillScheme="const", const1=0.D0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! -------------------- REIcontrail --------------------
+
+    ! Get REIcontrail field
+    call ESMF_StateGet(exportState, itemName="REIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_FieldFill(field, dataFillScheme="const", const1=0.D0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
     ! -----------------------------------------------
 
@@ -1633,6 +1779,34 @@ module CM
     ! -----------------------------------------------
 
     ! Exports
+
+    ! -------------------- deltaT_POT --------------------
+
+    ! Get deltaT_POT field
+    call ESMF_StateGet(exportState, itemName="deltaT_POT", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    c_arr_ptr = get_deltaT_POT(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
+        end do
+      end do
+    end do
 
     ! -------------------- deltaQV --------------------
 
