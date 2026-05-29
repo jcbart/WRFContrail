@@ -115,11 +115,11 @@ module CM_interface
     end interface
 
     interface
-        function get_deltaT_POT(CMptr) bind(C, name='get_deltaT_POT_extern')
+        function get_delta_T_POT(CMptr) bind(C, name='get_delta_T_POT_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            type(c_ptr) :: get_deltaT_POT
-        end function get_deltaT_POT
+            type(c_ptr) :: get_delta_T_POT
+        end function get_delta_T_POT
     end interface
 
     interface
@@ -187,11 +187,11 @@ module CM_interface
     end interface
 
     interface
-        function get_deltaQV(CMptr) bind(C, name='get_deltaQV_extern')
+        function get_delta_QV(CMptr) bind(C, name='get_delta_QV_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            type(c_ptr) :: get_deltaQV
-        end function get_deltaQV
+            type(c_ptr) :: get_delta_QV
+        end function get_delta_QV
     end interface
 
     interface
@@ -211,11 +211,11 @@ module CM_interface
     end interface
 
     interface
-        function get_deltaQI(CMptr) bind(C, name='get_deltaQI_extern')
+        function get_delta_QI(CMptr) bind(C, name='get_delta_QI_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            type(c_ptr) :: get_deltaQI
-        end function get_deltaQI
+            type(c_ptr) :: get_delta_QI
+        end function get_delta_QI
     end interface
 
     interface
@@ -227,11 +227,11 @@ module CM_interface
     end interface
 
     interface
-        function get_deltaNI(CMptr) bind(C, name='get_deltaNI_extern')
+        function get_delta_NI(CMptr) bind(C, name='get_delta_NI_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
-            type(c_ptr) :: get_deltaNI
-        end function get_deltaNI
+            type(c_ptr) :: get_delta_NI
+        end function get_delta_NI
     end interface
 
     interface

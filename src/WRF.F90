@@ -139,8 +139,8 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field: deltaT_POT
-    call NUOPC_Advertise(importState, StandardName="deltaT_POT", name="deltaT_POT", rc=rc)
+    ! importable field: delta_T_POT
+    call NUOPC_Advertise(importState, StandardName="delta_T_POT", name="delta_T_POT", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -195,8 +195,8 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field: deltaQV
-    call NUOPC_Advertise(importState, StandardName="deltaQV", name="deltaQV", rc=rc)
+    ! importable field: delta_QV
+    call NUOPC_Advertise(importState, StandardName="delta_QV", name="delta_QV", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -209,15 +209,15 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field: deltaQI
-    call NUOPC_Advertise(importState, StandardName="deltaQI", name="deltaQI", rc=rc)
+    ! importable field: delta_QI
+    call NUOPC_Advertise(importState, StandardName="delta_QI", name="delta_QI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field: deltaNI
-    call NUOPC_Advertise(importState, StandardName="deltaNI", name="deltaNI", rc=rc)
+    ! importable field: delta_NI
+    call NUOPC_Advertise(importState, StandardName="delta_NI", name="delta_NI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -429,7 +429,7 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaT_POT", &
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="delta_T_POT", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -485,7 +485,7 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaQV", &
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="delta_QV", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -499,14 +499,14 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaQI", &
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="delta_QI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    call NUOPC_Realize(importState, grid=grid3D, fieldName="deltaNI", &
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="delta_NI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1045,10 +1045,10 @@ module WRF
 
     ! Imports
 
-    ! -------------------- deltaT_POT --------------------
+    ! -------------------- delta_T_POT --------------------
 
-    ! Get deltaT_POT field
-    call ESMF_StateGet(importState, itemName="deltaT_POT", field=field, rc=rc)
+    ! Get delta_T_POT field
+    call ESMF_StateGet(importState, itemName="delta_T_POT", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1067,10 +1067,10 @@ module WRF
 
     !head_grid%RTHCONTEN(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
-    ! -------------------- deltaQV --------------------
+    ! -------------------- delta_QV --------------------
 
-    ! Get deltaQV field
-    call ESMF_StateGet(importState, itemName="deltaQV", field=field, rc=rc)
+    ! Get delta_QV field
+    call ESMF_StateGet(importState, itemName="delta_QV", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1090,10 +1090,10 @@ module WRF
 
     !head_grid%RQVCONTEN(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
-    ! -------------------- deltaQI --------------------
+    ! -------------------- delta_QI --------------------
 
-    ! Get deltaQI field
-    call ESMF_StateGet(importState, itemName="deltaQI", field=field, rc=rc)
+    ! Get delta_QI field
+    call ESMF_StateGet(importState, itemName="delta_QI", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1113,10 +1113,10 @@ module WRF
 
     !head_grid%RQICONTEN(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
-    ! -------------------- deltaNI --------------------
+    ! -------------------- delta_NI --------------------
 
-    ! Get deltaNI field
-    call ESMF_StateGet(importState, itemName="deltaNI", field=field, rc=rc)
+    ! Get delta_NI field
+    call ESMF_StateGet(importState, itemName="delta_NI", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &

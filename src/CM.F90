@@ -208,8 +208,8 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field: deltaT_POT
-    call NUOPC_Advertise(exportState, StandardName="deltaT_POT", name="deltaT_POT", rc=rc)
+    ! exportable field: delta_T_POT
+    call NUOPC_Advertise(exportState, StandardName="delta_T_POT", name="delta_T_POT", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -264,8 +264,8 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field: deltaQV
-    call NUOPC_Advertise(exportState, StandardName="deltaQV", name="deltaQV", rc=rc)
+    ! exportable field: delta_QV
+    call NUOPC_Advertise(exportState, StandardName="delta_QV", name="delta_QV", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -278,15 +278,15 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field: deltaQI
-    call NUOPC_Advertise(exportState, StandardName="deltaQI", name="deltaQI", rc=rc)
+    ! exportable field: delta_QI
+    call NUOPC_Advertise(exportState, StandardName="delta_QI", name="delta_QI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    ! exportable field: deltaNI
-    call NUOPC_Advertise(exportState, StandardName="deltaNI", name="deltaNI", rc=rc)
+    ! exportable field: delta_NI
+    call NUOPC_Advertise(exportState, StandardName="delta_NI", name="delta_NI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -502,7 +502,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaT_POT", &
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="delta_T_POT", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -558,7 +558,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaQV", &
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="delta_QV", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -572,14 +572,14 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaQI", &
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="delta_QI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    call NUOPC_Realize(exportState, grid=grid3D, fieldName="deltaNI", &
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="delta_NI", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -894,10 +894,10 @@ module CM
       call ESMF_LogWrite("T_POT dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
-    ! -------------------- deltaT_POT --------------------
+    ! -------------------- delta_T_POT --------------------
 
-    ! Get deltaT_POT field
-    call ESMF_StateGet(exportState, itemName="deltaT_POT", field=field, rc=rc)
+    ! Get delta_T_POT field
+    call ESMF_StateGet(exportState, itemName="delta_T_POT", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1192,10 +1192,10 @@ module CM
       call ESMF_LogWrite("QV dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
-    ! -------------------- deltaQV --------------------
+    ! -------------------- delta_QV --------------------
 
-    ! Get deltaQV field
-    call ESMF_StateGet(exportState, itemName="deltaQV", field=field, rc=rc)
+    ! Get delta_QV field
+    call ESMF_StateGet(exportState, itemName="delta_QV", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1254,10 +1254,10 @@ module CM
       call ESMF_LogWrite("QI dependency satisfied", ESMF_LOGMSG_INFO, rc=rc)
     end if
 
-    ! -------------------- deltaQI --------------------
+    ! -------------------- delta_QI --------------------
 
-    ! Get deltaQI field
-    call ESMF_StateGet(exportState, itemName="deltaQI", field=field, rc=rc)
+    ! Get delta_QI field
+    call ESMF_StateGet(exportState, itemName="delta_QI", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1276,10 +1276,10 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    ! -------------------- deltaNI --------------------
+    ! -------------------- delta_NI --------------------
 
-    ! Get deltaNI field
-    call ESMF_StateGet(exportState, itemName="deltaNI", field=field, rc=rc)
+    ! Get delta_NI field
+    call ESMF_StateGet(exportState, itemName="delta_NI", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1806,11 +1806,11 @@ module CM
 
     ! Exports
 
-    ! -------------------- deltaT_POT --------------------
+    ! -------------------- delta_T_POT --------------------
 
     if (temp_coupling) then
-      ! Get deltaT_POT field
-      call ESMF_StateGet(exportState, itemName="deltaT_POT", field=field, rc=rc)
+      ! Get delta_T_POT field
+      call ESMF_StateGet(exportState, itemName="delta_T_POT", field=field, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1823,7 +1823,7 @@ module CM
         file=__FILE__)) &
         return  ! bail out
 
-      c_arr_ptr = get_deltaT_POT(CMptr)
+      c_arr_ptr = get_delta_T_POT(CMptr)
       ! Swap order of sizes from row-major to column-major
       call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
 
@@ -1836,10 +1836,10 @@ module CM
       end do
     end if
 
-    ! -------------------- deltaQV --------------------
+    ! -------------------- delta_QV --------------------
 
-    ! Get deltaQV field
-    call ESMF_StateGet(exportState, itemName="deltaQV", field=field, rc=rc)
+    ! Get delta_QV field
+    call ESMF_StateGet(exportState, itemName="delta_QV", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1852,7 +1852,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    c_arr_ptr = get_deltaQV(CMptr)
+    c_arr_ptr = get_delta_QV(CMptr)
     ! Swap order of sizes from row-major to column-major
     call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
 
@@ -1864,10 +1864,10 @@ module CM
       end do
     end do
 
-    ! -------------------- deltaQI --------------------
+    ! -------------------- delta_QI --------------------
 
-    ! Get deltaQI field
-    call ESMF_StateGet(exportState, itemName="deltaQI", field=field, rc=rc)
+    ! Get delta_QI field
+    call ESMF_StateGet(exportState, itemName="delta_QI", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1880,7 +1880,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    c_arr_ptr = get_deltaQI(CMptr)
+    c_arr_ptr = get_delta_QI(CMptr)
     ! Swap order of sizes from row-major to column-major
     call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
 
@@ -1892,10 +1892,10 @@ module CM
       end do
     end do
 
-    ! -------------------- deltaNI --------------------
+    ! -------------------- delta_NI --------------------
 
-    ! Get deltaNI field
-    call ESMF_StateGet(exportState, itemName="deltaNI", field=field, rc=rc)
+    ! Get delta_NI field
+    call ESMF_StateGet(exportState, itemName="delta_NI", field=field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1908,7 +1908,7 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    c_arr_ptr = get_deltaNI(CMptr)
+    c_arr_ptr = get_delta_NI(CMptr)
     ! Swap order of sizes from row-major to column-major
     call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
 
