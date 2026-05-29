@@ -1065,6 +1065,8 @@ module WRF
     head_grid%t_2(ips:ipe, kps:kpe, jps:jpe) = &
       head_grid%t_2(ips:ipe, kps:kpe, jps:jpe) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
+    !head_grid%RTHCONTEN(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
     ! -------------------- deltaQV --------------------
 
     ! Get deltaQV field
@@ -1085,6 +1087,8 @@ module WRF
       head_grid%moist(ips:ipe, kps:kpe, jps:jpe, P_qv) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe), &
       1.E-10 &
     )
+
+    !head_grid%RQVCONTEN(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
     ! -------------------- deltaQI --------------------
 
@@ -1107,6 +1111,8 @@ module WRF
       0. &
     )
 
+    !head_grid%RQICONTEN(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
     ! -------------------- deltaNI --------------------
 
     ! Get deltaNI field
@@ -1127,6 +1133,8 @@ module WRF
       head_grid%scalar(ips:ipe, kps:kpe, jps:jpe, P_qni) + ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe), &
       0. &
     )
+
+    !head_grid%RQNICONTEN(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
     ! -------------------- QIcontrail --------------------
 

@@ -123,6 +123,14 @@ module CM_interface
     end interface
 
     interface
+        function get_T_POT_tend(CMptr) bind(C, name='get_T_POT_tend_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_T_POT_tend
+        end function get_T_POT_tend
+    end interface
+
+    interface
         function get_P(CMptr) bind(C, name='get_P_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
@@ -187,6 +195,14 @@ module CM_interface
     end interface
 
     interface
+        function get_QV_tend(CMptr) bind(C, name='get_QV_tend_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_QV_tend
+        end function get_QV_tend
+    end interface
+
+    interface
         function get_QI(CMptr) bind(C, name='get_QI_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
@@ -203,11 +219,27 @@ module CM_interface
     end interface
 
     interface
+        function get_QI_tend(CMptr) bind(C, name='get_QI_tend_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_QI_tend
+        end function get_QI_tend
+    end interface
+
+    interface
         function get_deltaNI(CMptr) bind(C, name='get_deltaNI_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr
             type(c_ptr) :: get_deltaNI
         end function get_deltaNI
+    end interface
+
+    interface
+        function get_NI_tend(CMptr) bind(C, name='get_NI_tend_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_NI_tend
+        end function get_NI_tend
     end interface
 
     interface

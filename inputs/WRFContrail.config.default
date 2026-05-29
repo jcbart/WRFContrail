@@ -7,6 +7,7 @@ Contrail Manager threads: 1
 
 Coupling interval (s): 600
 
+Temperature coupling: .true.
 Effective radius coupling: .true.
 
 ! off, low, high, max

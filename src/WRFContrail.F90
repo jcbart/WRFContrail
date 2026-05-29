@@ -211,13 +211,19 @@ subroutine FieldDictionaryAddEntries()
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call NUOPC_FieldDictionaryAddEntry("T_POT", "Kelvin", rc)
+  call NUOPC_FieldDictionaryAddEntry("T_POT", "K", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call NUOPC_FieldDictionaryAddEntry("deltaT_POT", "Kelvin", rc)
+  call NUOPC_FieldDictionaryAddEntry("deltaT_POT", "K", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("T_POT_tend", "K s-1", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
@@ -271,6 +277,12 @@ subroutine FieldDictionaryAddEntries()
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  call NUOPC_FieldDictionaryAddEntry("QV_tend", "kg kg-1 s-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call NUOPC_FieldDictionaryAddEntry("QI", "kg kg-1", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -283,7 +295,19 @@ subroutine FieldDictionaryAddEntries()
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  call NUOPC_FieldDictionaryAddEntry("QI_tend", "kg kg-1 s-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call NUOPC_FieldDictionaryAddEntry("deltaNI", "# kg-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("NI_tend", "# kg-1 s-1", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &

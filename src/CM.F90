@@ -30,8 +30,10 @@ module CM
   ! C pointer to Contrail Manager object
   type(c_ptr), save :: CMptr
 
-  ! Effective radius coupling; read from config in SetServices
-  logical :: re_coupling
+  ! Temperature coupling
+  logical, save :: temp_coupling
+  ! Effective radius coupling
+  logical, save :: re_coupling
 
   ! WRF domain indices
   integer(c_int), save :: ids = 0, ide = 0, jds = 0, jde = 0, kds = 0, kde = 0
@@ -49,7 +51,7 @@ module CM
 
     type(ESMF_Config)             :: config
     type(NUOPC_FreeFormat)        :: ff
-    character(len=800)            :: re_coupling_char
+    character(len=800)            :: temp_coupling_char, re_coupling_char
 
     rc = ESMF_SUCCESS
 
@@ -88,6 +90,30 @@ module CM
 
     ! Get the config
     call ESMF_GridCompGet(model, config=config, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get temperature coupling logical from config
+    ff = NUOPC_FreeFormatCreate(config, label="Temperature coupling:", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_FreeFormatGetLine(ff, 1, lineString=temp_coupling_char)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+    read(temp_coupling_char, *) temp_coupling
+
+    if (temp_coupling) then
+      call ESMF_LogWrite("Temperature is coupled.", ESMF_LOGMSG_INFO, rc=rc)
+    else
+      call ESMF_LogWrite("Temperature is not coupled.", ESMF_LOGMSG_INFO, rc=rc)
+    end if
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1782,31 +1808,33 @@ module CM
 
     ! -------------------- deltaT_POT --------------------
 
-    ! Get deltaT_POT field
-    call ESMF_StateGet(exportState, itemName="deltaT_POT", field=field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+    if (temp_coupling) then
+      ! Get deltaT_POT field
+      call ESMF_StateGet(exportState, itemName="deltaT_POT", field=field, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
 
-    ! Get pointer from field
-    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+      ! Get pointer from field
+      call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
 
-    c_arr_ptr = get_deltaT_POT(CMptr)
-    ! Swap order of sizes from row-major to column-major
-    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+      c_arr_ptr = get_deltaT_POT(CMptr)
+      ! Swap order of sizes from row-major to column-major
+      call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
 
-    do i = 1, i_size
-      do j = 1, j_size
-        do k = 1, k_size
-          ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
+      do i = 1, i_size
+        do j = 1, j_size
+          do k = 1, k_size
+            ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
+          end do
         end do
       end do
-    end do
+    end if
 
     ! -------------------- deltaQV --------------------
 
