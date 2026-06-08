@@ -545,7 +545,8 @@ module WRF
 
     ! WRF domain info
     integer(ESMF_KIND_I4)       :: intvals(19)
-    integer                     :: ips, ipe, jps, jpe, kps, kpe
+    integer                     :: ids, ide, jds, jde, kds, kde, &
+                                   ips, ipe, jps, jpe, kps, kpe
 
     rc = ESMF_SUCCESS
 
@@ -565,6 +566,12 @@ module WRF
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    ids = intvals(1)
+    ide = intvals(2)
+    jds = intvals(3)
+    jde = intvals(4)
+    kds = intvals(5)
+    kde = intvals(6)
     ips = intvals(13)
     ipe = intvals(14)
     jps = intvals(15)
@@ -782,9 +789,9 @@ module WRF
       return  ! bail out
 
     ! U_earth = U_grid * cos(alpha) - V_grid * sin(alpha)
-    do j = jps, jpe-1
+    do j = jps, min(jpe, jde-1)
       do k = kps, kpe
-        do i = ips, ipe-1
+        do i = ips, min(ipe, ide-1)
           ESMF_ptr_3D(i, k, j) = (0.5d0 * (head_grid%u_2(i, k, j) + head_grid%u_2(i+1, k, j))) &
                                  * head_grid%cosa(i, j) &
                                  - (0.5d0 * (head_grid%v_2(i, k, j) + head_grid%v_2(i, k, j+1))) &
@@ -817,9 +824,9 @@ module WRF
       return  ! bail out
 
     ! V_earth = V_grid * cos(alpha) + U_grid * sin(alpha)
-    do j = jps, jpe-1
+    do j = jps, min(jpe, jde-1)
       do k = kps, kpe
-        do i = ips, ipe-1
+        do i = ips, min(ipe, ide-1)
           ESMF_ptr_3D(i, k, j) = (0.5d0 * (head_grid%v_2(i, k, j) + head_grid%v_2(i, k, j+1))) &
                                  * head_grid%cosa(i, j) &
                                  + (0.5d0 * (head_grid%u_2(i, k, j) + head_grid%u_2(i+1, k, j))) &
@@ -992,7 +999,8 @@ module WRF
 
     ! WRF domain info
     integer(ESMF_KIND_I4)       :: intvals(19)
-    integer                     :: ips, ipe, jps, jpe, kps, kpe
+    integer                     :: ids, ide, jds, jde, kds, kde, &
+                                   ips, ipe, jps, jpe, kps, kpe
 
     rc = ESMF_SUCCESS
 
@@ -1010,6 +1018,12 @@ module WRF
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    ids = intvals(1)
+    ide = intvals(2)
+    jds = intvals(3)
+    jde = intvals(4)
+    kds = intvals(5)
+    kde = intvals(6)
     ips = intvals(13)
     ipe = intvals(14)
     jps = intvals(15)
@@ -1302,9 +1316,9 @@ module WRF
       return  ! bail out
 
     ! U_earth = U_grid * cos(alpha) - V_grid * sin(alpha)
-    do j = jps, jpe-1
+    do j = jps, min(jpe, jde-1)
       do k = kps, kpe
-        do i = ips, ipe-1
+        do i = ips, min(ipe, ide-1)
           ESMF_ptr_3D(i, k, j) = (0.5d0 * (head_grid%u_2(i, k, j) + head_grid%u_2(i+1, k, j))) &
                                  * head_grid%cosa(i, j) &
                                  - (0.5d0 * (head_grid%v_2(i, k, j) + head_grid%v_2(i, k, j+1))) &
@@ -1330,9 +1344,9 @@ module WRF
       return  ! bail out
 
     ! V_earth = V_grid * cos(alpha) + U_grid * sin(alpha)
-    do j = jps, jpe-1
+    do j = jps, min(jpe, jde-1)
       do k = kps, kpe
-        do i = ips, ipe-1
+        do i = ips, min(ipe, ide-1)
           ESMF_ptr_3D(i, k, j) = (0.5d0 * (head_grid%v_2(i, k, j) + head_grid%v_2(i, k, j+1))) &
                                  * head_grid%cosa(i, j) &
                                  + (0.5d0 * (head_grid%u_2(i, k, j) + head_grid%u_2(i+1, k, j))) &

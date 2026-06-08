@@ -27,7 +27,10 @@ With ESMF installed on your system, there are three steps to creating the couple
 
 If you are not familiar with WRF, use the [official tutorial](https://www2.mmm.ucar.edu/wrf/OnLineTutorial/index.php) to supplement the following.
 
-Clone the ESMF branch of this [WRF GitHub fork](https://github.com/jcbart/WRF/tree/ESMF).
+Clone the ESMF branch of this [WRF GitHub fork](https://github.com/jcbart/WRF/tree/ESMF) with
+```bash
+git clone -b ESMF https://github.com/jcbart/WRF.git
+```
 
 Your ESMF installation should have all of the library requirements for WRF already. Set `NETCDF` and `HDF5` in your environment and add `$(NETCDF)/bin` to your `PATH`.
 
