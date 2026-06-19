@@ -251,6 +251,14 @@ module CM_interface
     end interface
 
     interface
+        function get_NIcontrail(CMptr) bind(C, name='get_NIcontrail_extern')
+            import :: c_ptr
+            type(c_ptr), intent(in), value :: CMptr
+            type(c_ptr) :: get_NIcontrail
+        end function get_NIcontrail
+    end interface
+
+    interface
         function get_REIcontrail(CMptr) bind(C, name='get_REIcontrail_extern')
             import :: c_ptr
             type(c_ptr), intent(in), value :: CMptr

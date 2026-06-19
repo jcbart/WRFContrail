@@ -11,7 +11,7 @@
 module CM
 
   !-----------------------------------------------------------------------------
-  ! COntrail Manager Component.
+  ! Contrail Manager Component.
   !-----------------------------------------------------------------------------
 
   use ESMF
@@ -294,6 +294,13 @@ module CM
 
     ! exportable field: QIcontrail
     call NUOPC_Advertise(exportState, StandardName="QIcontrail", name="QIcontrail",rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! exportable field: NIcontrail
+    call NUOPC_Advertise(exportState, StandardName="NIcontrail", name="NIcontrail",rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -587,6 +594,13 @@ module CM
       return  ! bail out
 
     call NUOPC_Realize(exportState, grid=grid3D, fieldName="QIcontrail", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call NUOPC_Realize(exportState, grid=grid3D, fieldName="NIcontrail", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1320,6 +1334,28 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
+    ! -------------------- NIcontrail --------------------
+
+    ! Get NIcontrail field
+    call ESMF_StateGet(exportState, itemName="NIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_FieldFill(field, dataFillScheme="const", const1=0.D0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Indicate that the field has been updated
+    call NUOPC_SetAttribute(field, name="Updated", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! -------------------- REIcontrail --------------------
 
     ! Get REIcontrail field
@@ -1937,6 +1973,34 @@ module CM
       return  ! bail out
 
     c_arr_ptr = get_QIcontrail(CMptr)
+    ! Swap order of sizes from row-major to column-major
+    call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
+
+    do i = 1, i_size
+      do j = 1, j_size
+        do k = 1, k_size
+          ESMF_ptr_3D(ids+i-1, kds+k-1, jds+j-1) = f_arr_ptr_3D(k, j, i)
+        end do
+      end do
+    end do
+
+    ! -------------------- NIcontrail --------------------
+
+    ! Get NIcontrail field
+    call ESMF_StateGet(exportState, itemName="NIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    c_arr_ptr = get_NIcontrail(CMptr)
     ! Swap order of sizes from row-major to column-major
     call c_f_pointer(c_arr_ptr, f_arr_ptr_3D, [k_size, j_size, i_size])
 

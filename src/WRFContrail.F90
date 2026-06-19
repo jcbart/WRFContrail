@@ -122,7 +122,7 @@ program WRFContrail
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
   end if
 
-  ! Call Run  for driver component
+  ! Call Run for driver component
   call ESMF_GridCompRun(drvComp, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -314,6 +314,12 @@ subroutine FieldDictionaryAddEntries()
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call NUOPC_FieldDictionaryAddEntry("QIcontrail", "kg kg-1", rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call NUOPC_FieldDictionaryAddEntry("NIcontrail", "# kg-1", rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &

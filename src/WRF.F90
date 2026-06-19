@@ -202,7 +202,7 @@ module WRF
       file=__FILE__)) &
       return  ! bail out
 
-    ! importable field: QI
+    ! exportable field: QI
     call NUOPC_Advertise(exportState, StandardName="QI", name="QI", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -225,6 +225,13 @@ module WRF
 
     ! importable field: QIcontrail
     call NUOPC_Advertise(importState, StandardName="QIcontrail", name="QIcontrail", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! importable field: NIcontrail
+    call NUOPC_Advertise(importState, StandardName="NIcontrail", name="NIcontrail", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -514,6 +521,13 @@ module WRF
       return  ! bail out
 
     call NUOPC_Realize(importState, grid=grid3D, fieldName="QIcontrail", &
+      typekind=ESMF_TYPEKIND_R4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call NUOPC_Realize(importState, grid=grid3D, fieldName="NIcontrail", &
       typekind=ESMF_TYPEKIND_R4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1167,6 +1181,24 @@ module WRF
       return  ! bail out
 
     head_grid%qicontrail(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
+
+    ! -------------------- NIcontrail --------------------
+
+    ! Get NIcontrail field
+    call ESMF_StateGet(importState, itemName="NIcontrail", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! Get pointer from field
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=ESMF_ptr_3D, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    head_grid%nicontrail(ips:ipe, kps:kpe, jps:jpe) = ESMF_ptr_3D(ips:ipe, kps:kpe, jps:jpe)
 
     ! -------------------- REIcontrail --------------------
 
