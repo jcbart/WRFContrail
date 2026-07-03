@@ -7,6 +7,7 @@ module CM_interface
     implicit none
 
     ! Projection codes
+    integer, parameter :: PROJ_LATLON = 0
     integer, parameter :: PROJ_LC = 1
 
     type, public, bind(C) :: CMTime_F
@@ -45,22 +46,37 @@ module CM_interface
     ! Domain setup
 
     interface
-        subroutine init_domainlc(CMptr, ids, ide, jds, jde, kds, kde, &
-            lat1, lon1, knowni, knownj, dx, stdlon, truelat1, truelat2) &
-            bind(C, name='init_domainlc_extern')
+        subroutine init_lambertconformal_domain(CMptr, ids, ide, jds, jde, kds, kde, &
+            lat1, lon1, dx, stdlon, truelat1, truelat2) &
+            bind(C, name='init_lambertconformal_domain_extern')
 
             import :: c_ptr, c_int, c_float
             type(c_ptr), intent(in), value :: CMptr
             integer(c_int), intent(in), value :: ids, ide, jds, jde, kds, kde
             real(c_float), intent(in), value :: lat1
             real(c_float), intent(in), value :: lon1
-            real(c_float), intent(in), value :: knowni
-            real(c_float), intent(in), value :: knownj
             real(c_float), intent(in), value :: dx
             real(c_float), intent(in), value :: stdlon
             real(c_float), intent(in), value :: truelat1
             real(c_float), intent(in), value :: truelat2
-        end subroutine init_domainlc
+        end subroutine init_lambertconformal_domain
+    end interface
+
+    interface
+        subroutine init_latlon_domain(CMptr, ids, ide, jds, jde, kds, kde, &
+            lat1, lon1, dx, stdlon, truelat1, truelat2) &
+            bind(C, name='init_latlon_domain_extern')
+
+            import :: c_ptr, c_int, c_float
+            type(c_ptr), intent(in), value :: CMptr
+            integer(c_int), intent(in), value :: ids, ide, jds, jde, kds, kde
+            real(c_float), intent(in), value :: lat1
+            real(c_float), intent(in), value :: lon1
+            real(c_float), intent(in), value :: dx
+            real(c_float), intent(in), value :: stdlon
+            real(c_float), intent(in), value :: truelat1
+            real(c_float), intent(in), value :: truelat2
+        end subroutine init_latlon_domain
     end interface
 
 

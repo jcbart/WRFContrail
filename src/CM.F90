@@ -418,9 +418,13 @@ module CM
       file=__FILE__)) &
       return  ! bail out
 
-    if (proj_code .eq. PROJ_LC) then
-      call init_domainlc(CMptr, ids, ide-1, jds, jde-1, kds, kde-1, &
-        lat1, lon1, knowni, knownj, dx, stdlon, truelat1, truelat2)
+    if (proj_code .eq. PROJ_LATLON) then
+      call init_latlon_domain(CMptr, ids, ide-1, jds, jde-1, kds, kde-1, &
+        lat1, lon1, dx, stdlon, truelat1, truelat2)
+    
+    else if (proj_code .eq. PROJ_LC) then
+      call init_lambertconformal_domain(CMptr, ids, ide-1, jds, jde-1, kds, kde-1, &
+        lat1, lon1, dx, stdlon, truelat1, truelat2)
 
     else
       write(msgString, *) "proj_code ", proj_code, " not recognised"
